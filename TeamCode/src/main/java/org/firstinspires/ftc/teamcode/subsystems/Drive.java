@@ -26,20 +26,20 @@ public class Drive extends SubsystemBase {
     public Drive(HardwareMap hardwareMap, Telemetry t) {
         this.t = t;
 
-        leftFrontMotor = hardwareMap.get(DcMotor.class, "drive_lf");
-        leftBackMotor = hardwareMap.get(DcMotor.class, "drive_lb");
-        rightFrontMotor = hardwareMap.get(DcMotor.class, "drive_rf");
-        rightBackMotor = hardwareMap.get(DcMotor.class, "drive_rb");
+        leftFrontMotor = hardwareMap.get(DcMotor.class, "leftFrontMotor");
+        leftBackMotor = hardwareMap.get(DcMotor.class, "leftBackMotor");
+        rightFrontMotor = hardwareMap.get(DcMotor.class, "rightFrontMotor");
+        rightBackMotor = hardwareMap.get(DcMotor.class, "rightBackMotor");
 
         leftFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        leftFrontMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftBackMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightFrontMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightBackMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFrontMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftBackMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFrontMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightBackMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         leftFrontMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
