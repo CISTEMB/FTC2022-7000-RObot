@@ -119,6 +119,7 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
             timeSamples.add(elapsedTime);
             positionSamples.add(drive.getPoseEstimate().getX());
             powerSamples.add(power);
+            telemetry.addData("power", power);
 
             drive.setDrivePower(new Pose2d(power, 0.0, 0.0));
             drive.updatePoseEstimate();
