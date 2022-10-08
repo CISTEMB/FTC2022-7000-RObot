@@ -27,7 +27,7 @@ public class SplineTest extends LinearOpMode {
 
         drive.followTrajectory(traj);
 
-        sleep(2000);
+        sleep(200);
 
         drive.followTrajectory(
                 drive.trajectoryBuilder(traj.end(), true)
