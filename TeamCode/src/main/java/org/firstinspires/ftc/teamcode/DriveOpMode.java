@@ -9,6 +9,7 @@ import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.commands.DriveWithGamepadCommand;
+import org.firstinspires.ftc.teamcode.subsystems.Arm;
 import org.firstinspires.ftc.teamcode.subsystems.Drive;
 
 @TeleOp(name = "TeleOp")
@@ -16,10 +17,12 @@ import org.firstinspires.ftc.teamcode.subsystems.Drive;
 public class DriveOpMode extends CommandOpMode {
 
     private Drive drive;
+    private Arm arm1;
 
     @Override
     public void initialize(){
         drive = new Drive(hardwareMap, telemetry);
+        arm1 = new Arm(hardwareMap, telemetry);
 
         drive.setDefaultCommand(
                 new DriveWithGamepadCommand(gamepad1, drive)
