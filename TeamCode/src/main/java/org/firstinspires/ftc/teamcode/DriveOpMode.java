@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -31,8 +32,13 @@ public class DriveOpMode extends CommandOpMode {
         // Driver 1
         {
             GamepadEx driver = new GamepadEx(gamepad1);
+            driver.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                    .whileHeld(new InstantCommand(()-> arm1.setPower(1.0), arm1))
+                    .whenReleased(new InstantCommand(() -> arm1.setPower(0), arm1));
 
-
+            driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+                    .whileHeld(new InstantCommand(()-> arm1.setPower(-0.2), arm1))
+                    .whenReleased(new InstantCommand(() -> arm1.setPower(0), arm1));
 
         }
 

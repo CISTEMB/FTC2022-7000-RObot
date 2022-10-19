@@ -4,6 +4,8 @@ import com.acmerobotics.roadrunner.util.MathUtil;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
@@ -15,6 +17,7 @@ public class Arm extends SubsystemBase {
     private AnalogInput pot;
     private final InterpLUT angleLookup = new InterpLUT();
 
+    private DcMotor pivotMotor;
 
 
 
@@ -43,6 +46,11 @@ public class Arm extends SubsystemBase {
         angleLookup.add(3.33, 270);
         angleLookup.add(4,270);
         angleLookup.createLUT();
+
+        pivotMotor = hardwareMap.get(DcMotor.class, "fEncoder");
+        pivotMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        pivotMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        pivotMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public double getAngle() {
@@ -51,6 +59,10 @@ public class Arm extends SubsystemBase {
         final double potentiometerAngle = angleLookup.get(pot.getVoltage());
 
         return potentiometerAngle + offset;
+    }
+
+    public void setPower(double power){
+        pivotMotor.setPower(power);
     }
 
     @Override
