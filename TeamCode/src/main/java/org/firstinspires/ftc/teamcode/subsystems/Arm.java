@@ -1,24 +1,25 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.roadrunner.util.MathUtil;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Arm extends SubsystemBase {
 
-    private Telemetry t;
-    private AnalogInput pot;
+    private final Telemetry t;
+    private final AnalogInput pot;
     private final InterpLUT angleLookup = new InterpLUT();
 
-    private DcMotor pivotMotor;
-
+    private final DcMotor pivotMotor;
+    private final PIDFController controller = new PIDFController(0, 0, 0, 0);
+    private double setPoint;
+    private boolean pidEnabled;
 
 
     public Arm(HardwareMap hardwareMap, Telemetry t) {
@@ -54,22 +55,42 @@ public class Arm extends SubsystemBase {
     }
 
     public double getAngle() {
-        final double offset = 0; //Arm is straight down
+        final double offset = 16; //Arm is straight down
 
         final double potentiometerAngle = angleLookup.get(pot.getVoltage());
 
-        return potentiometerAngle + offset;
+        return potentiometerAngle - offset;
     }
 
     public void setPower(double power){
         pivotMotor.setPower(power);
+        setPIDEnabled(false);
+    }
+
+    public void setAngle(double angle){
+        setPoint = angle;
+        setPIDEnabled(true);
+    }
+
+    public void setPIDEnabled(boolean enabled){
+        pidEnabled = enabled;
     }
 
     @Override
-    public void periodic() {
-     t.addData("arm1Pot", getAngle());
-     t.addData("arm1PotVoltage", pot.getVoltage());
-     t.update();
+    public void periodic(){
+        if (pidEnabled) {
+            double output = controller.calculate(
+                    getAngle(), setPoint
+            );
+
+            pivotMotor.setPower(output);
+        } else {
+            controller.reset();
+        }
+        //telemetry
+        t.addData("arm1Pot", getAngle());
+        t.addData("arm1PotVoltage", pot.getVoltage());
+        t.update();
 
     }
 }

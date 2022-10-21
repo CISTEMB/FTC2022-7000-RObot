@@ -40,6 +40,10 @@ public class DriveOpMode extends CommandOpMode {
                     .whileHeld(new InstantCommand(()-> arm1.setPower(-0.2), arm1))
                     .whenReleased(new InstantCommand(() -> arm1.setPower(0), arm1));
 
+            driver.getGamepadButton(GamepadKeys.Button.A)
+                    .whileHeld(new InstantCommand(()-> arm1.setAngle(90), arm1))
+                    .whenReleased(new InstantCommand(() -> arm1.setPower(0), arm1));
+
         }
 
         // Driver2
