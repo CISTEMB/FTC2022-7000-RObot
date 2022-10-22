@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.util.InterpLUT;
@@ -7,17 +8,20 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+@Config
 public class Arm extends SubsystemBase {
+    public static PIDCoefficients ARM_PID = new PIDCoefficients(0, 0, 0);
 
     private final Telemetry t;
     private final AnalogInput pot;
     private final InterpLUT angleLookup = new InterpLUT();
 
     private final DcMotor pivotMotor;
-    private final PIDFController controller = new PIDFController(0, 0, 0, 0);
+    private final PIDFController controller = new PIDFController(ARM_PID.p, ARM_PID.i, ARM_PID.d, 0);
     private double setPoint;
     private boolean pidEnabled;
     private double openLoopPower;
@@ -90,11 +94,11 @@ public class Arm extends SubsystemBase {
             output = openLoopPower;
         }
 
-        if ((output < 0) && (getAngle() <= 0)) {
+        if ((output < 0) && (getAngle() <= 1)) {
             output = 0;
         }
 
-        if ((output > 0) && (getAngle() >= 250)) {
+        if ((output > 0) && (getAngle() >= 180)) {
             output = 0;
         }
 
