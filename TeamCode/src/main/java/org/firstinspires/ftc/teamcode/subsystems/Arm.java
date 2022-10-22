@@ -20,6 +20,7 @@ public class Arm extends SubsystemBase {
     private final PIDFController controller = new PIDFController(0, 0, 0, 0);
     private double setPoint;
     private boolean pidEnabled;
+    private double openLoopPower;
 
 
     public Arm(HardwareMap hardwareMap, Telemetry t) {
@@ -63,7 +64,7 @@ public class Arm extends SubsystemBase {
     }
 
     public void setPower(double power){
-        pivotMotor.setPower(power);
+        openLoopPower = power;
         setPIDEnabled(false);
     }
 
@@ -78,15 +79,27 @@ public class Arm extends SubsystemBase {
 
     @Override
     public void periodic(){
+        double output;
         if (pidEnabled) {
-            double output = controller.calculate(
+             output = controller.calculate(
                     getAngle(), setPoint
             );
 
-            pivotMotor.setPower(output);
         } else {
             controller.reset();
+            output = openLoopPower;
         }
+
+        if ((output < 0) && (getAngle() <= 0)) {
+            output = 0;
+        }
+
+        if ((output > 0) && (getAngle() >= 250)) {
+            output = 0;
+        }
+
+        pivotMotor.setPower(output);
+
         //telemetry
         t.addData("arm1Pot", getAngle());
         t.addData("arm1PotVoltage", pot.getVoltage());
