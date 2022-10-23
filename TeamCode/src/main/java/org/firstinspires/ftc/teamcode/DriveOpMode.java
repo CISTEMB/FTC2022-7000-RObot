@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
@@ -19,11 +21,15 @@ public class DriveOpMode extends CommandOpMode {
 
     private Drive drive;
     private Arm arm1;
+    private Arm arm2;
 
     @Override
     public void initialize(){
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
         drive = new Drive(hardwareMap, telemetry);
-        arm1 = new Arm(hardwareMap, telemetry);
+        arm1 = new Arm(hardwareMap, telemetry, Arm.ARM1_CONFIG);
+        arm2 = new Arm(hardwareMap, telemetry, Arm.ARM2_CONFIG);
 
         drive.setDefaultCommand(
                 new DriveWithGamepadCommand(gamepad1, drive)
@@ -44,6 +50,14 @@ public class DriveOpMode extends CommandOpMode {
                     .whileHeld(new InstantCommand(()-> arm1.setAngle(90), arm1))
                     .whenReleased(new InstantCommand(() -> arm1.setPower(0), arm1));
 
+            driver.getGamepadButton(GamepadKeys.Button.B)
+                    .whileHeld(new InstantCommand(()-> arm1.setAngle(45), arm1))
+                    .whenReleased(new InstantCommand(() -> arm1.setPower(0), arm1));
+
+            driver.getGamepadButton(GamepadKeys.Button.X)
+                    .whileHeld(new InstantCommand(()-> arm1.setAngle(135), arm1))
+                    .whenReleased(new InstantCommand(() -> arm1.setPower(0), arm1));
+
         }
 
         // Driver2
@@ -53,5 +67,11 @@ public class DriveOpMode extends CommandOpMode {
 
 
         }
+    }
+
+    @Override
+    public void run() {
+        super.run();
+        telemetry.update();
     }
 }
