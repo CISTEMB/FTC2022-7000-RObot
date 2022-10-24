@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,16 +13,32 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import java.util.function.DoubleSupplier;
+
 @Config
 public class Arm extends SubsystemBase {
     public static Config ARM1_CONFIG = buildArm1Config();
     public static Config ARM2_CONFIG = buildArm2Config();
 
+    public static class Config {
+        private String name;
+        private String potName;
+        private String motorName;
+
+        public PIDFCoefficients pidfCoefficients = new PIDFCoefficients();
+        public double potOffset;
+
+        public DcMotorSimple.Direction motorDirection;
+        public double softLimitMin;
+        public double softLimitMax;
+        public double tolerance;
+    }
+
     private static Config buildArm1Config() {
         Config config = new Config();
         config.name = "Arm1";
 
-        config.pidfCoefficients = new PIDFCoefficients(0, 0, 0, 0);
+        config.pidfCoefficients = new PIDFCoefficients(0.07, 0, 0, 0.15);
         config.potName = "arm1Pot";
         config.potOffset = 14.5;
 
@@ -40,32 +57,19 @@ public class Arm extends SubsystemBase {
 
         config.pidfCoefficients = new PIDFCoefficients(0, 0, 0, 0);
         config.potName = "arm2Pot";
-        config.potOffset = 0;
+        config.potOffset = 90;
 
         config.motorName = "lEncoder";
         config.motorDirection = DcMotorSimple.Direction.FORWARD;
         config.softLimitMin = 2;
-        config.softLimitMax = 180;
+        config.softLimitMax = 150;
         config.tolerance = 2;
 
         return config;
     }
 
-    public static class Config {
-        private String name;
-        private String potName;
-        private String motorName;
-
-        public PIDFCoefficients pidfCoefficients = new PIDFCoefficients();
-        public double potOffset;
-
-        public DcMotorSimple.Direction motorDirection;
-        public double softLimitMin;
-        public double softLimitMax;
-        public double tolerance;
-    }
-
     private final Config config;
+    private final DoubleSupplier feedforwardAngleOffset;
     private final Telemetry t;
     private final AnalogInput pot;
     private final InterpLUT angleLookup = new InterpLUT();
@@ -76,10 +80,17 @@ public class Arm extends SubsystemBase {
     private boolean pidEnabled;
     private double openLoopPower;
 
+    private ArmState armState;
 
-    public Arm(HardwareMap hardwareMap, Telemetry t, Config config) {
+    public Arm(HardwareMap hardwareMap, Telemetry t, Config config, ArmState armState) {
+        this(hardwareMap, t, config, () -> 0, armState);
+    }
+
+    public Arm(HardwareMap hardwareMap, Telemetry t, Config config, DoubleSupplier feedforwardAngleOffset, ArmState armState) {
         this.t = t;
         this.config = config;
+        this.feedforwardAngleOffset = feedforwardAngleOffset;
+        this.armState = armState;
         pot = hardwareMap.get(AnalogInput.class, config.potName);
         angleLookup.add(-1,0);
         angleLookup.add(0, 0);
@@ -116,7 +127,7 @@ public class Arm extends SubsystemBase {
     public double getAngle() {
         final double offset = config.potOffset; //Arm is straight down
 
-        final double potentiometerAngle = angleLookup.get(pot.getVoltage());
+        double potentiometerAngle = angleLookup.get(pot.getVoltage());
 
         return potentiometerAngle - offset;
     }
@@ -145,10 +156,20 @@ public class Arm extends SubsystemBase {
 
     @Override
     public void periodic(){
+        // This should be a interface or something or make a ArmStateCallback and register with ARmState for which arm this is
+        if (config.name.equals("Arm1")) {
+            armState.setJoint1Angle(Rotation2d.fromDegrees(getAngle()));
+        } else if (config.name.equals("Arm2")) {
+            armState.setJoint2Angle(Rotation2d.fromDegrees(getAngle()));
+        }
+        
         controller.setPID(config.pidfCoefficients.p, config.pidfCoefficients.i, config.pidfCoefficients.d);
         controller.setTolerance(config.tolerance);
 
         double currentAngle = getAngle();
+        double feedForwardAngle = currentAngle + feedforwardAngleOffset.getAsDouble();
+        t.addData(config.name+"PIDFeedForwardAngle",feedForwardAngle);
+
         double output;
         if (pidEnabled) {
             t.addData(config.name + "PIDSetPoint", setPoint);
@@ -170,12 +191,22 @@ public class Arm extends SubsystemBase {
             output = openLoopPower;
         }
 
+
         if ((output < 0) && (getAngle() <= config.softLimitMin)) {
             output = 0;
         }
 
         if ((output > 0) && (getAngle() >= config.softLimitMax)) {
             output = 0;
+        }
+
+        // Special Arm2 Code
+        if (config.name.equals("Arm2")) {
+            boolean arm2FrameCollision = armState.detectArm2FrameCollision();
+            t.addData(config.name + "FrameCollision", arm2FrameCollision);
+            if (output < 0 && arm2FrameCollision) {
+                output = 0;
+            }
         }
 
         pivotMotor.setPower(output);
