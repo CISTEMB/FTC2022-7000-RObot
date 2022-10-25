@@ -14,22 +14,31 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Arm extends SubsystemBase {
-    public static PIDCoefficients ARM_PID = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients ARM1_PID = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients ARM2_PID = new PIDCoefficients(0, 0, 0);
 
     private final Telemetry t;
+    private String armPotName;
+    private double potOffset;
+    private double softLowLimit;
+    private double softHighLimit;
     private final AnalogInput pot;
     private final InterpLUT angleLookup = new InterpLUT();
 
     private final DcMotor pivotMotor;
-    private final PIDFController controller = new PIDFController(ARM_PID.p, ARM_PID.i, ARM_PID.d, 0);
+    private final PIDFController controller;
     private double setPoint;
     private boolean pidEnabled;
     private double openLoopPower;
 
 
-    public Arm(HardwareMap hardwareMap, Telemetry t) {
+    public Arm(HardwareMap hardwareMap, Telemetry t, String armPotName, String motorName, double potOffset, double softLowLimit, double softHighLimit, DcMotorSimple.Direction direction, PIDCoefficients pidCoefficients) {
         this.t = t;
-        pot = hardwareMap.get(AnalogInput.class, "arm1Pot");
+        this.armPotName = armPotName;
+        this.potOffset = potOffset;
+        this.softLowLimit = softLowLimit;
+        this.softHighLimit = softHighLimit;
+        pot = hardwareMap.get(AnalogInput.class, armPotName);
         angleLookup.add(-1,0);
         angleLookup.add(0, 0);
         angleLookup.add(0.108, 15);
@@ -53,18 +62,19 @@ public class Arm extends SubsystemBase {
         angleLookup.add(4,270);
         angleLookup.createLUT();
 
-        pivotMotor = hardwareMap.get(DcMotor.class, "fEncoder");
+        pivotMotor = hardwareMap.get(DcMotor.class, motorName);
         pivotMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        pivotMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        pivotMotor.setDirection(direction);
         pivotMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        controller = new PIDFController(pidCoefficients.p, pidCoefficients.i, pidCoefficients.d, 0);
     }
 
     public double getAngle() {
-        final double offset = 16; //Arm is straight down
 
         final double potentiometerAngle = angleLookup.get(pot.getVoltage());
 
-        return potentiometerAngle - offset;
+        return potentiometerAngle - potOffset;
     }
 
     public void setPower(double power){
@@ -94,20 +104,18 @@ public class Arm extends SubsystemBase {
             output = openLoopPower;
         }
 
-        if ((output < 0) && (getAngle() <= 1)) {
+        if ((output < 0) && (getAngle() <= softLowLimit)) {
             output = 0;
         }
 
-        if ((output > 0) && (getAngle() >= 180)) {
+        if ((output > 0) && (getAngle() >= softHighLimit)) {
             output = 0;
         }
 
         pivotMotor.setPower(output);
 
         //telemetry
-        t.addData("arm1Pot", getAngle());
-        t.addData("arm1PotVoltage", pot.getVoltage());
-        t.update();
-
+        t.addData(armPotName, getAngle());
+        t.addData(armPotName+"Voltage", pot.getVoltage());
     }
 }

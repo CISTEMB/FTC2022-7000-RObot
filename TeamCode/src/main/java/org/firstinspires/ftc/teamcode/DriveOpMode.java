@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.commands.DriveWithGamepadCommand;
 import org.firstinspires.ftc.teamcode.subsystems.Arm;
@@ -19,11 +20,13 @@ public class DriveOpMode extends CommandOpMode {
 
     private Drive drive;
     private Arm arm1;
+    private Arm arm2;
 
     @Override
     public void initialize(){
         drive = new Drive(hardwareMap, telemetry);
-        arm1 = new Arm(hardwareMap, telemetry);
+        arm1 = new Arm(hardwareMap, telemetry, "arm1Pot", "fEncoder", 16,1, 180, DcMotorSimple.Direction.REVERSE, Arm.ARM1_PID);
+        arm2 = new Arm(hardwareMap, telemetry, "arm2Pot", "lEncoder", 0, 1, 180, DcMotorSimple.Direction.FORWARD, Arm.ARM2_PID);
 
         drive.setDefaultCommand(
                 new DriveWithGamepadCommand(gamepad1, drive)
@@ -53,5 +56,11 @@ public class DriveOpMode extends CommandOpMode {
 
 
         }
+    }
+
+    @Override
+    public void run() {
+        super.run();
+        telemetry.update();
     }
 }
