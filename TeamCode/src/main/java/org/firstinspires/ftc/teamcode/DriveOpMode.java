@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
@@ -24,9 +26,10 @@ public class DriveOpMode extends CommandOpMode {
 
     @Override
     public void initialize(){
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         drive = new Drive(hardwareMap, telemetry);
-        arm1 = new Arm(hardwareMap, telemetry, "arm1Pot", "fEncoder", 16,1, 180, DcMotorSimple.Direction.REVERSE, Arm.ARM1_PID);
-        arm2 = new Arm(hardwareMap, telemetry, "arm2Pot", "lEncoder", 0, 1, 180, DcMotorSimple.Direction.FORWARD, Arm.ARM2_PID);
+        arm1 = new Arm(hardwareMap, telemetry, "Arm1", "arm1Pot", "fEncoder", 16,1, 180, DcMotorSimple.Direction.REVERSE, Arm.ARM1_PID);
+        arm2 = new Arm(hardwareMap, telemetry, "Arm2","arm2Pot", "lEncoder", 0, 1, 180, DcMotorSimple.Direction.FORWARD, Arm.ARM2_PID);
 
         drive.setDefaultCommand(
                 new DriveWithGamepadCommand(gamepad1, drive)

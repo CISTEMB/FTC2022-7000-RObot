@@ -3,21 +3,24 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Arm extends SubsystemBase {
-    public static PIDCoefficients ARM1_PID = new PIDCoefficients(0, 0, 0);
-    public static PIDCoefficients ARM2_PID = new PIDCoefficients(0, 0, 0);
+    public static PIDFCoefficients ARM1_PID = new PIDFCoefficients(0.0, 0, 0,0);
+    public static PIDFCoefficients ARM2_PID = new PIDFCoefficients(0, 0,0 ,0);
 
     private final Telemetry t;
+    private String name;
     private String armPotName;
     private double potOffset;
     private double softLowLimit;
@@ -27,17 +30,20 @@ public class Arm extends SubsystemBase {
 
     private final DcMotor pivotMotor;
     private final PIDFController controller;
+    private final PIDFCoefficients pidCoefficients;
     private double setPoint;
     private boolean pidEnabled;
     private double openLoopPower;
 
 
-    public Arm(HardwareMap hardwareMap, Telemetry t, String armPotName, String motorName, double potOffset, double softLowLimit, double softHighLimit, DcMotorSimple.Direction direction, PIDCoefficients pidCoefficients) {
+    public Arm(HardwareMap hardwareMap, Telemetry t, String name, String armPotName, String motorName, double potOffset, double softLowLimit, double softHighLimit, DcMotorSimple.Direction direction, PIDFCoefficients pidCoefficients) {
         this.t = t;
+        this.name = name;
         this.armPotName = armPotName;
         this.potOffset = potOffset;
         this.softLowLimit = softLowLimit;
         this.softHighLimit = softHighLimit;
+        this.pidCoefficients = pidCoefficients;
         pot = hardwareMap.get(AnalogInput.class, armPotName);
         angleLookup.add(-1,0);
         angleLookup.add(0, 0);
@@ -70,11 +76,12 @@ public class Arm extends SubsystemBase {
         controller = new PIDFController(pidCoefficients.p, pidCoefficients.i, pidCoefficients.d, 0);
     }
 
-    public double getAngle() {
+    public Rotation2d getAngle() {
 
         final double potentiometerAngle = angleLookup.get(pot.getVoltage());
 
-        return potentiometerAngle - potOffset;
+       // return potentiometerAngle - potOffset;
+        return Rotation2d.fromDegrees(potentiometerAngle - potOffset);
     }
 
     public void setPower(double power){
@@ -93,29 +100,38 @@ public class Arm extends SubsystemBase {
 
     @Override
     public void periodic(){
+        controller.setPIDF(pidCoefficients.p, pidCoefficients.i, pidCoefficients.d, 0);
+
         double output;
         if (pidEnabled) {
              output = controller.calculate(
-                    getAngle(), setPoint
+                    getAngle().getDegrees(), setPoint
             );
+
+             double feedForward = getAngle().getSin() * pidCoefficients.f;
+             output = output + feedForward;
+
+             t.addData(name + "PIDOutput", output);
+             t.addData(name + "PIDSetPoint", setPoint);
+             t.addData(name + "PIDError", controller.getPositionError());
 
         } else {
             controller.reset();
             output = openLoopPower;
         }
 
-        if ((output < 0) && (getAngle() <= softLowLimit)) {
+        if ((output < 0) && (getAngle().getDegrees() <= softLowLimit)) {
             output = 0;
         }
 
-        if ((output > 0) && (getAngle() >= softHighLimit)) {
+        if ((output > 0) && (getAngle().getDegrees() >= softHighLimit)) {
             output = 0;
         }
 
         pivotMotor.setPower(output);
 
         //telemetry
-        t.addData(armPotName, getAngle());
-        t.addData(armPotName+"Voltage", pot.getVoltage());
+        t.addData(name+"Angle", getAngle().getDegrees());
+        t.addData(name+"Voltage", pot.getVoltage());
     }
 }
