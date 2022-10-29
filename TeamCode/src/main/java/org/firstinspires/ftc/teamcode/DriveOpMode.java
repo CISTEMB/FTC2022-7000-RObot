@@ -17,6 +17,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.commands.DriveWithGamepadCommand;
 import org.firstinspires.ftc.teamcode.commands.SetArmAngleCommand;
 import org.firstinspires.ftc.teamcode.subsystems.Arm;
+import org.firstinspires.ftc.teamcode.subsystems.Claw;
+import org.firstinspires.ftc.teamcode.subsystems.ClawPitch;
+import org.firstinspires.ftc.teamcode.subsystems.ClawRoll;
 import org.firstinspires.ftc.teamcode.subsystems.Drive;
 
 @TeleOp(name = "TeleOp")
@@ -26,6 +29,9 @@ public class DriveOpMode extends CommandOpMode {
     private Drive drive;
     private Arm arm1;
     private Arm arm2;
+    private Claw claw;
+    private ClawPitch clawPitch;
+    private ClawRoll clawRoll;
 
     @Override
     public void initialize(){
@@ -33,6 +39,9 @@ public class DriveOpMode extends CommandOpMode {
         drive = new Drive(hardwareMap, telemetry);
         arm1 = new Arm(hardwareMap, telemetry, "Arm1", "arm1Pot", "fEncoder", 16,1, 180, DcMotorSimple.Direction.REVERSE, Arm.ARM1_PID, 1, -1);
         arm2 = new Arm(hardwareMap, telemetry, "Arm2","arm2Pot", "lEncoder", 90, 1, 155, DcMotorSimple.Direction.FORWARD, Arm.ARM2_PID, 0.75, -0.75);
+        claw = new Claw(hardwareMap);
+        clawPitch = new ClawPitch(hardwareMap);
+        clawRoll = new ClawRoll(hardwareMap);
 
         drive.setDefaultCommand(
                 new DriveWithGamepadCommand(gamepad1, drive)
@@ -41,6 +50,18 @@ public class DriveOpMode extends CommandOpMode {
         // Driver 1
         {
             GamepadEx driver = new GamepadEx(gamepad1);
+
+            driver.getGamepadButton(GamepadKeys.Button.A)
+                    .whileHeld(new InstantCommand(()-> claw.Grab(), claw))
+                    .whenReleased(new InstantCommand(() -> claw.Release(), claw));
+
+            driver.getGamepadButton(GamepadKeys.Button.B)
+                    .whileHeld(new InstantCommand(()-> clawRoll.UpsideDown(), clawRoll))
+                    .whenReleased(new InstantCommand(() -> clawRoll.Upright(), clawRoll));
+
+            driver.getGamepadButton(GamepadKeys.Button.X)
+                    .whileHeld(new InstantCommand(()-> clawPitch.setPosition(0.5), clawPitch))
+                    .whenReleased(new InstantCommand(() -> clawPitch.setPosition(0), clawPitch));
 
         }
 
