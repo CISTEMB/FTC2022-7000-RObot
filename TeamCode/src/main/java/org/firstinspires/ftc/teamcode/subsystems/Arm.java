@@ -31,12 +31,14 @@ public class Arm extends SubsystemBase {
     private final DcMotor pivotMotor;
     private final PIDFController controller;
     private final PIDFCoefficients pidCoefficients;
+    private double maxOutput;
+    private double minOutput;
     private double setPoint;
     private boolean pidEnabled;
     private double openLoopPower;
 
 
-    public Arm(HardwareMap hardwareMap, Telemetry t, String name, String armPotName, String motorName, double potOffset, double softLowLimit, double softHighLimit, DcMotorSimple.Direction direction, PIDFCoefficients pidCoefficients) {
+    public Arm(HardwareMap hardwareMap, Telemetry t, String name, String armPotName, String motorName, double potOffset, double softLowLimit, double softHighLimit, DcMotorSimple.Direction direction, PIDFCoefficients pidCoefficients, double maxOutput, double minOutput) {
         this.t = t;
         this.name = name;
         this.armPotName = armPotName;
@@ -44,6 +46,8 @@ public class Arm extends SubsystemBase {
         this.softLowLimit = softLowLimit;
         this.softHighLimit = softHighLimit;
         this.pidCoefficients = pidCoefficients;
+        this.maxOutput = maxOutput;
+        this.minOutput = minOutput;
         pot = hardwareMap.get(AnalogInput.class, armPotName);
         angleLookup.add(-1,0);
         angleLookup.add(0, 0);
@@ -126,6 +130,14 @@ public class Arm extends SubsystemBase {
 
         if ((output > 0) && (getAngle().getDegrees() >= softHighLimit)) {
             output = 0;
+        }
+
+        if (output > maxOutput){
+            output = maxOutput;
+        }
+
+        if (output < minOutput){
+            output = minOutput;
         }
 
         pivotMotor.setPower(output);
