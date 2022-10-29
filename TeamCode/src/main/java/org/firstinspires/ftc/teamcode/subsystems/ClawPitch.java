@@ -1,19 +1,22 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.hardware.ServoEx;
+import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
+@Config
 public class ClawPitch extends SubsystemBase {
 
-    private Servo servo;
+    private ServoEx servo;
 
     public ClawPitch(HardwareMap hardwareMap){
-        servo = hardwareMap.get(Servo.class, "clawPitch");
-        servo.setDirection(Servo.Direction.REVERSE);
+        servo = new SimpleServo(hardwareMap, "clawPitch", 0, 270);
+        servo.setInverted(false);
     }
 
-    public void setPosition(double angle){
-       servo.setPosition(angle);
+    public void setAngle(double angle){
+       servo.turnToAngle(angle);
     }
 }

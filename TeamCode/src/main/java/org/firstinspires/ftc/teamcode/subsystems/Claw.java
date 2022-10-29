@@ -1,10 +1,15 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+@Config
 public class Claw extends SubsystemBase {
+
+    public static double GRAB = 0;
+    public static double RELEASE = 0.5;
 
     private Servo servo;
 
@@ -14,10 +19,10 @@ public class Claw extends SubsystemBase {
     }
 
     public void Grab() {
-        servo.setPosition(0);
+        servo.setPosition(GRAB);
     }
 
     public void Release() {
-        servo.setPosition(1);
+        servo.setPosition(RELEASE);
     }
 }
