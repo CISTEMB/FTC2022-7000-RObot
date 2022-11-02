@@ -136,6 +136,21 @@ public class DriveOpMode extends CommandOpMode {
                             new InstantCommand(()-> clawPitch.setAngle(60))
                     )
             ));
+
+            //high back
+            driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whileHeld(new ParallelCommandGroup(
+                    new SetArmAngleCommand(arm1, 167),
+                    new SequentialCommandGroup(
+                            new WaitCommand(300),
+                            new SetArmAngleCommand(arm2, 30)
+                    ),
+                    new SequentialCommandGroup(
+                            new WaitUntilCommand(() -> arm1.getAngle().getDegrees() > 145),
+                            new InstantCommand(()-> clawRoll.UpsideDown()),
+                            new InstantCommand(()-> clawPitch.setAngle(60))
+
+                    )
+            ));
         }
     }
 
