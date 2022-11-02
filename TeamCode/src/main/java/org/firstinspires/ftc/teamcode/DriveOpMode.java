@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -67,11 +68,12 @@ public class DriveOpMode extends CommandOpMode {
         {
             GamepadEx driver2 = new GamepadEx(gamepad2);
 
+            //drive
             driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new ParallelCommandGroup(
-                    new SetArmAngleCommand(arm1, 1),
+                    new SetArmAngleCommand(arm2, 160),
                     new SequentialCommandGroup(
-                        new WaitCommand(50),
-                        new SetArmAngleCommand(arm2, 160)
+                        new WaitUntilCommand(() -> arm2.getAngle().getDegrees() > 145),
+                        new SetArmAngleCommand(arm1, 1)
                     ),
                     new SequentialCommandGroup(
                         new WaitCommand(100),
@@ -79,33 +81,59 @@ public class DriveOpMode extends CommandOpMode {
                     )
                 ));
 
-            driver2.getGamepadButton(GamepadKeys.Button.A).whileHeld(new ParallelCommandGroup(
-                    new SetArmAngleCommand(arm1, 0),
-                    new SetArmAngleCommand(arm2, 100)
+            //pickup from floor
+            driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileHeld(new ParallelCommandGroup(
+                    new InstantCommand(()-> clawPitch.setAngle(0)),
+                    new SequentialCommandGroup(
+                            new WaitCommand(100),
+                            new ParallelCommandGroup(
+                                    new SetArmAngleCommand(arm1, 0),
+                                    new SetArmAngleCommand(arm2, 100)
+                            )
+                    )
             ));
-
-            driver2.getGamepadButton(GamepadKeys.Button.B).whileHeld(new ParallelCommandGroup(
-                    new SetArmAngleCommand(arm1, 50),
-                    new SetArmAngleCommand(arm2, 110),
+            //ground
+            driver2.getGamepadButton(GamepadKeys.Button.A).whileHeld(new ParallelCommandGroup(
+                    new InstantCommand(()-> clawPitch.setAngle(0)),
                     new SequentialCommandGroup(
                         new WaitCommand(100),
-                        new InstantCommand(()-> clawPitch.setAngle(60))
+                        new ParallelCommandGroup(
+                                new SetArmAngleCommand(arm1, 0),
+                                new SetArmAngleCommand(arm2, 112)
+                        )
                     )
             ));
 
+            //low
+            driver2.getGamepadButton(GamepadKeys.Button.B).whileHeld(new ParallelCommandGroup(
+                    new SetArmAngleCommand(arm1, 55),
+                    new SetArmAngleCommand(arm2, 120),
+                    new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new InstantCommand(()-> clawPitch.setAngle(65))
+                    )
+            ));
+
+            //medium
             driver2.getGamepadButton(GamepadKeys.Button.X).whileHeld(new ParallelCommandGroup(
                     new SetArmAngleCommand(arm1, 95),
                     new SequentialCommandGroup(
                         new WaitCommand(300),
-                        new SetArmAngleCommand(arm2, 85)
+                        new SetArmAngleCommand(arm2, 85),
+                        new InstantCommand(()-> clawPitch.setAngle(60), clawPitch)
                     )
             ));
 
+            //high front
             driver2.getGamepadButton(GamepadKeys.Button.Y).whileHeld(new ParallelCommandGroup(
                     new SetArmAngleCommand(arm1, 160),
                     new SequentialCommandGroup(
                         new WaitCommand(300),
                         new SetArmAngleCommand(arm2, 10)
+                    ),
+                    new SequentialCommandGroup(
+                            new WaitCommand(100),
+                            new InstantCommand(()-> clawPitch.setAngle(60))
                     )
             ));
         }

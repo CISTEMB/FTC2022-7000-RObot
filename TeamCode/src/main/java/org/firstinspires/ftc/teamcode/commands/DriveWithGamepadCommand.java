@@ -23,9 +23,9 @@ public class DriveWithGamepadCommand extends CommandBase {
 
     @Override
     public void execute() {
-        double forward = gamepad.left_stick_y;
-        double turn = gamepad.right_stick_x;
-        double strafe = gamepad.left_stick_x;
+        double forward = gamepad.left_stick_y * 0.5;
+        double turn = gamepad.right_stick_x * 0.5;
+        double strafe = gamepad.left_stick_x * 0.5;
         forward = -forward;
 
         if (Math.abs(strafe) <= Math.abs(forward)){
