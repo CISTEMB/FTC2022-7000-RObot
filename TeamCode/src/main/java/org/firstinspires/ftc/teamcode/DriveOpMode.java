@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.commands.DriveWithGamepadCommand;
+import org.firstinspires.ftc.teamcode.commands.GrabConeCommand;
 import org.firstinspires.ftc.teamcode.commands.SetArmAngleCommand;
 import org.firstinspires.ftc.teamcode.subsystems.Arm;
 import org.firstinspires.ftc.teamcode.subsystems.Claw;
@@ -51,16 +52,11 @@ public class DriveOpMode extends CommandOpMode {
             GamepadEx driver = new GamepadEx(gamepad1);
 
             driver.getGamepadButton(GamepadKeys.Button.A)
-                    .whileHeld(new InstantCommand(()-> claw.Grab(), claw))
-                    .whenReleased(new InstantCommand(() -> claw.Release(), claw));
+                .toggleWhenPressed(new GrabConeCommand(claw));
 
             driver.getGamepadButton(GamepadKeys.Button.B)
-                    .whileHeld(new InstantCommand(()-> clawRoll.UpsideDown(), clawRoll))
-                    .whenReleased(new InstantCommand(() -> clawRoll.Upright(), clawRoll));
-
-            driver.getGamepadButton(GamepadKeys.Button.X)
-                    .whileHeld(new InstantCommand(()-> clawPitch.setAngle(45), clawPitch))
-                    .whenReleased(new InstantCommand(() -> clawPitch.setAngle(0), clawPitch));
+                .whileHeld(new InstantCommand(()-> clawRoll.UpsideDown(), clawRoll))
+                .whenReleased(new InstantCommand(() -> clawRoll.Upright(), clawRoll));
 
         }
 
@@ -69,7 +65,8 @@ public class DriveOpMode extends CommandOpMode {
             GamepadEx driver2 = new GamepadEx(gamepad2);
 
             //drive
-            driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new ParallelCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ParallelCommandGroup(
+                    new InstantCommand(()-> clawRoll.Upright()),
                     new SetArmAngleCommand(arm2, 160),
                     new SequentialCommandGroup(
                         new WaitUntilCommand(() -> arm2.getAngle().getDegrees() > 145),
@@ -82,7 +79,8 @@ public class DriveOpMode extends CommandOpMode {
                 ));
 
             //pickup from floor
-            driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileHeld(new ParallelCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new ParallelCommandGroup(
+                    new InstantCommand(()-> clawRoll.Upright()),
                     new InstantCommand(()-> clawPitch.setAngle(0)),
                     new SequentialCommandGroup(
                             new WaitCommand(100),
@@ -92,8 +90,9 @@ public class DriveOpMode extends CommandOpMode {
                             )
                     )
             ));
-            //ground
-            driver2.getGamepadButton(GamepadKeys.Button.A).whileHeld(new ParallelCommandGroup(
+            //ground junction
+            driver2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new ParallelCommandGroup(
+                    new InstantCommand(()-> clawRoll.Upright()),
                     new InstantCommand(()-> clawPitch.setAngle(0)),
                     new SequentialCommandGroup(
                         new WaitCommand(100),
@@ -105,7 +104,8 @@ public class DriveOpMode extends CommandOpMode {
             ));
 
             //low
-            driver2.getGamepadButton(GamepadKeys.Button.B).whileHeld(new ParallelCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.B).whenPressed(new ParallelCommandGroup(
+                    new InstantCommand(()-> clawRoll.Upright()),
                     new SetArmAngleCommand(arm1, 55),
                     new SetArmAngleCommand(arm2, 120),
                     new SequentialCommandGroup(
@@ -115,7 +115,8 @@ public class DriveOpMode extends CommandOpMode {
             ));
 
             //medium
-            driver2.getGamepadButton(GamepadKeys.Button.X).whileHeld(new ParallelCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.X).whenPressed(new ParallelCommandGroup(
+                    new InstantCommand(()-> clawRoll.Upright()),
                     new SetArmAngleCommand(arm1, 95),
                     new SequentialCommandGroup(
                         new WaitCommand(300),
@@ -125,7 +126,8 @@ public class DriveOpMode extends CommandOpMode {
             ));
 
             //high front
-            driver2.getGamepadButton(GamepadKeys.Button.Y).whileHeld(new ParallelCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new ParallelCommandGroup(
+                    new InstantCommand(()-> clawRoll.Upright()),
                     new SetArmAngleCommand(arm1, 160),
                     new SequentialCommandGroup(
                         new WaitCommand(300),
@@ -138,19 +140,20 @@ public class DriveOpMode extends CommandOpMode {
             ));
 
             //high back
-            driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whileHeld(new ParallelCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ParallelCommandGroup(
                     new SetArmAngleCommand(arm1, 167),
                     new SequentialCommandGroup(
                             new WaitCommand(300),
                             new SetArmAngleCommand(arm2, 30)
                     ),
                     new SequentialCommandGroup(
-                            new WaitUntilCommand(() -> arm1.getAngle().getDegrees() > 145),
+                            new WaitUntilCommand(()-> arm1.getAngle().getDegrees() > 145),
                             new InstantCommand(()-> clawRoll.UpsideDown()),
                             new InstantCommand(()-> clawPitch.setAngle(60))
 
                     )
             ));
+
         }
     }
 
