@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.command.SelectCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -89,14 +90,14 @@ public class DriveOpMode extends CommandOpMode {
             // score select
             //
 
-            driver2.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new SequentialCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)).whenActive(new SequentialCommandGroup(
                 new InstantCommand(()-> {
                     if(armScoreState < 5) {
                         armScoreState++;
                     }
                 }),
                 new WaitCommand(100),
-                new SelectCommand(
+                new ScheduleCommand(new SelectCommand(
                         new HashMap<Object, Command>() {{
                             put(1, ArmCommandFactory.createSourceGroundJunction(clawRoll,  clawPitch, arm1, arm2));
                             put(2, ArmCommandFactory.createSourceLowJunction(clawRoll,  clawPitch, arm1, arm2));
@@ -105,17 +106,17 @@ public class DriveOpMode extends CommandOpMode {
                             put(5, ArmCommandFactory.createSourceHighBackJunction(clawRoll,  clawPitch, arm1, arm2));
                         }},
                         ()-> armScoreState
-                )
-            )));
+                ))
+            ));
 
-            driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).and(driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new SequentialCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).and(driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)).whenActive(new SequentialCommandGroup(
                     new InstantCommand(()-> {
                         if(armScoreState > 1) {
                             armScoreState--;
                         }
                     }),
                     new WaitCommand(100),
-                    new SelectCommand(
+                    new ScheduleCommand(new SelectCommand(
                             new HashMap<Object, Command>() {{
                                 put(1, ArmCommandFactory.createSourceGroundJunction(clawRoll,  clawPitch, arm1, arm2));
                                 put(2, ArmCommandFactory.createSourceLowJunction(clawRoll,  clawPitch, arm1, arm2));
@@ -124,13 +125,13 @@ public class DriveOpMode extends CommandOpMode {
                                 put(5, ArmCommandFactory.createSourceHighBackJunction(clawRoll,  clawPitch, arm1, arm2));
                             }},
                             ()-> armScoreState
-                    )
-            )));
+                    ))
+            ));
 
             //
             // pickup select
             //
-            driver2.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new SequentialCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)).whenActive(new ScheduleCommand(new SequentialCommandGroup(
                     new InstantCommand(()-> {
                         if(armPickUpState < 5) {
                             armPickUpState++;
@@ -150,7 +151,7 @@ public class DriveOpMode extends CommandOpMode {
 
             )));
 
-            driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).and(driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new SequentialCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).and(driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)).whenActive(new ScheduleCommand(new SequentialCommandGroup(
                     new InstantCommand(()-> {
                         if(armPickUpState > 1) {
                             armPickUpState--;
@@ -173,13 +174,13 @@ public class DriveOpMode extends CommandOpMode {
             //
             // drive mde
             //
-            driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).and(driver2.getGamepadButton((GamepadKeys.Button.RIGHT_BUMPER)).negate().whenActive(new SequentialCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).and(driver2.getGamepadButton((GamepadKeys.Button.RIGHT_BUMPER))).negate().whenActive(new SequentialCommandGroup(
                     new InstantCommand(()->{
                         armScoreState = 0;
                         armPickUpState = 0;
                     }),
                     ArmCommandFactory.createSourceDrive(clawRoll, clawPitch, arm1, arm2)
-            )));
+            ));
 
         }
     }
