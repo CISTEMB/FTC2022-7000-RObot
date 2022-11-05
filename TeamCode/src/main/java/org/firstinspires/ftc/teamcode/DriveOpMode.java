@@ -2,9 +2,11 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.SelectCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -13,6 +15,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.commands.ArmCommandFactory;
 import org.firstinspires.ftc.teamcode.commands.DriveWithGamepadCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabConeCommand;
 import org.firstinspires.ftc.teamcode.commands.SetArmAngleCommand;
@@ -21,6 +24,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Claw;
 import org.firstinspires.ftc.teamcode.subsystems.ClawPitch;
 import org.firstinspires.ftc.teamcode.subsystems.ClawRoll;
 import org.firstinspires.ftc.teamcode.subsystems.Drive;
+
+import java.util.HashMap;
 
 @TeleOp(name = "TeleOp")
 
@@ -32,6 +37,9 @@ public class DriveOpMode extends CommandOpMode {
     private Claw claw;
     private ClawPitch clawPitch;
     private ClawRoll clawRoll;
+
+    private int armScoreState;
+    private int armPickUpState;
 
     @Override
     public void initialize(){
@@ -64,21 +72,7 @@ public class DriveOpMode extends CommandOpMode {
         {
             GamepadEx driver2 = new GamepadEx(gamepad2);
 
-            //drive
-            driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ParallelCommandGroup(
-                    new InstantCommand(()-> clawRoll.Upright()),
-                    new SetArmAngleCommand(arm2, 160),
-                    new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> arm2.getAngle().getDegrees() > 145),
-                        new SetArmAngleCommand(arm1, 1)
-                    ),
-                    new SequentialCommandGroup(
-                        new WaitCommand(100),
-                        new InstantCommand(()-> clawPitch.setAngle(60))
-                    )
-                ));
-
-            //pickup from floor
+            /*pickup from floor
             driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new ParallelCommandGroup(
                     new InstantCommand(()-> clawRoll.Upright()),
                     new InstantCommand(()-> clawPitch.setAngle(0)),
@@ -90,69 +84,102 @@ public class DriveOpMode extends CommandOpMode {
                             )
                     )
             ));
-            //ground junction
-            driver2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new ParallelCommandGroup(
-                    new InstantCommand(()-> clawRoll.Upright()),
-                    new InstantCommand(()-> clawPitch.setAngle(0)),
-                    new SequentialCommandGroup(
-                        new WaitCommand(100),
-                        new ParallelCommandGroup(
-                                new SetArmAngleCommand(arm1, 0),
-                                new SetArmAngleCommand(arm2, 112)
-                        )
-                    )
-            ));
+            */
+            //
+            // score select
+            //
 
-            //low
-            driver2.getGamepadButton(GamepadKeys.Button.B).whenPressed(new ParallelCommandGroup(
-                    new InstantCommand(()-> clawRoll.Upright()),
-                    new SetArmAngleCommand(arm1, 55),
-                    new SetArmAngleCommand(arm2, 120),
-                    new SequentialCommandGroup(
-                        new WaitCommand(100),
-                        new InstantCommand(()-> clawPitch.setAngle(65))
-                    )
-            ));
+            driver2.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new SequentialCommandGroup(
+                new InstantCommand(()-> {
+                    if(armScoreState < 5) {
+                        armScoreState++;
+                    }
+                }),
+                new WaitCommand(100),
+                new SelectCommand(
+                        new HashMap<Object, Command>() {{
+                            put(1, ArmCommandFactory.createSourceGroundJunction(clawRoll,  clawPitch, arm1, arm2));
+                            put(2, ArmCommandFactory.createSourceLowJunction(clawRoll,  clawPitch, arm1, arm2));
+                            put(3, ArmCommandFactory.createSourceMediumJunction(clawRoll,  clawPitch, arm1, arm2));
+                            put(4, ArmCommandFactory.createSourceHighFrontJunction(clawRoll,  clawPitch, arm1, arm2));
+                            put(5, ArmCommandFactory.createSourceHighBackJunction(clawRoll,  clawPitch, arm1, arm2));
+                        }},
+                        ()-> armScoreState
+                )
+            )));
 
-            //medium
-            driver2.getGamepadButton(GamepadKeys.Button.X).whenPressed(new ParallelCommandGroup(
-                    new InstantCommand(()-> clawRoll.Upright()),
-                    new SetArmAngleCommand(arm1, 95),
-                    new SequentialCommandGroup(
-                        new WaitCommand(300),
-                        new SetArmAngleCommand(arm2, 85),
-                        new InstantCommand(()-> clawPitch.setAngle(60), clawPitch)
+            driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).and(driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new SequentialCommandGroup(
+                    new InstantCommand(()-> {
+                        if(armScoreState > 1) {
+                            armScoreState--;
+                        }
+                    }),
+                    new WaitCommand(100),
+                    new SelectCommand(
+                            new HashMap<Object, Command>() {{
+                                put(1, ArmCommandFactory.createSourceGroundJunction(clawRoll,  clawPitch, arm1, arm2));
+                                put(2, ArmCommandFactory.createSourceLowJunction(clawRoll,  clawPitch, arm1, arm2));
+                                put(3, ArmCommandFactory.createSourceMediumJunction(clawRoll,  clawPitch, arm1, arm2));
+                                put(4, ArmCommandFactory.createSourceHighFrontJunction(clawRoll,  clawPitch, arm1, arm2));
+                                put(5, ArmCommandFactory.createSourceHighBackJunction(clawRoll,  clawPitch, arm1, arm2));
+                            }},
+                            ()-> armScoreState
                     )
-            ));
+            )));
 
-            //high front
-            driver2.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new ParallelCommandGroup(
-                    new InstantCommand(()-> clawRoll.Upright()),
-                    new SetArmAngleCommand(arm1, 160),
-                    new SequentialCommandGroup(
-                        new WaitCommand(300),
-                        new SetArmAngleCommand(arm2, 10)
-                    ),
-                    new SequentialCommandGroup(
-                            new WaitCommand(100),
-                            new InstantCommand(()-> clawPitch.setAngle(60))
+            //
+            // pickup select
+            //
+            driver2.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new SequentialCommandGroup(
+                    new InstantCommand(()-> {
+                        if(armPickUpState < 5) {
+                            armPickUpState++;
+                        }
+                    }),
+                    new WaitCommand(100),
+                    new SelectCommand(
+                            new HashMap<Object, Command>() {{
+//                        put(1, ArmCommandFactory.createSourceGroundJunction(clawRoll,  clawPitch, arm1, arm2));
+//                        put(2, ArmCommandFactory.createSourceLowJunction(clawRoll,  clawPitch, arm1, arm2));
+//                        put(3, ArmCommandFactory.createSourceMediumJunction(clawRoll,  clawPitch, arm1, arm2));
+//                        put(4, ArmCommandFactory.createSourceHighFrontJunction(clawRoll,  clawPitch, arm1, arm2));
+//                        put(5, ArmCommandFactory.createSourceHighBackJunction(clawRoll,  clawPitch, arm1, arm2));
+                            }},
+                            ()-> armPickUpState
                     )
-            ));
 
-            //high back
-            driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ParallelCommandGroup(
-                    new SetArmAngleCommand(arm1, 167),
-                    new SequentialCommandGroup(
-                            new WaitCommand(300),
-                            new SetArmAngleCommand(arm2, 30)
-                    ),
-                    new SequentialCommandGroup(
-                            new WaitUntilCommand(()-> arm1.getAngle().getDegrees() > 145),
-                            new InstantCommand(()-> clawRoll.UpsideDown()),
-                            new InstantCommand(()-> clawPitch.setAngle(60))
+            )));
 
+            driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).and(driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new SequentialCommandGroup(
+                    new InstantCommand(()-> {
+                        if(armPickUpState > 1) {
+                            armPickUpState--;
+                        }
+                    }),
+                    new WaitCommand(100),
+                    new SelectCommand(
+                            new HashMap<Object, Command>() {{
+//                        put(1, ArmCommandFactory.createSourceGroundJunction(clawRoll,  clawPitch, arm1, arm2));
+//                        put(2, ArmCommandFactory.createSourceLowJunction(clawRoll,  clawPitch, arm1, arm2));
+//                        put(3, ArmCommandFactory.createSourceMediumJunction(clawRoll,  clawPitch, arm1, arm2));
+//                        put(4, ArmCommandFactory.createSourceHighFrontJunction(clawRoll,  clawPitch, arm1, arm2));
+//                        put(5, ArmCommandFactory.createSourceHighBackJunction(clawRoll,  clawPitch, arm1, arm2));
+                            }},
+                            ()-> armPickUpState
                     )
-            ));
+
+            )));
+
+            //
+            // drive mde
+            //
+            driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).and(driver2.getGamepadButton((GamepadKeys.Button.RIGHT_BUMPER)).negate().whenActive(new SequentialCommandGroup(
+                    new InstantCommand(()->{
+                        armScoreState = 0;
+                        armPickUpState = 0;
+                    }),
+                    ArmCommandFactory.createSourceDrive(clawRoll, clawPitch, arm1, arm2)
+            )));
 
         }
     }
@@ -160,6 +187,7 @@ public class DriveOpMode extends CommandOpMode {
     @Override
     public void run() {
         super.run();
+        telemetry.addData("armScoreState", armScoreState);
         telemetry.update();
     }
 }
