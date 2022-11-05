@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.MapSelectCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.PrintCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -115,15 +116,15 @@ public class AutoOpMode extends CommandOpMode {
 
             new MapSelectCommand<>(
                     ImmutableMap.of(
-                            VisionPipeline.MarkerPlacement.LOCATION_1, new DriveStrafeCommand(telemetry, drive, -1000, 0.5),
-                            VisionPipeline.MarkerPlacement.LOCATION_2, null,
-                            VisionPipeline.MarkerPlacement.LOCATION_3, new DriveStrafeCommand(telemetry, drive, 1000,0.5),
-                            VisionPipeline.MarkerPlacement.UNKNOWN, null
+                            VisionPipeline.MarkerPlacement.LOCATION_1, new DriveStrafeCommand(telemetry, drive, -1500, 0.5),
+                            VisionPipeline.MarkerPlacement.LOCATION_2, new PrintCommand("Location 2"),
+                            VisionPipeline.MarkerPlacement.LOCATION_3, new DriveStrafeCommand(telemetry, drive, 1500,0.5),
+                            VisionPipeline.MarkerPlacement.UNKNOWN, new PrintCommand("Location unknown")
                     ),
                     () -> waitForVisionCommand.getPlacement()
             ),
 
-            new DriveForwardCommand(telemetry, drive, 24, 0.5)
+            new DriveForwardCommand(telemetry, drive, 36, 0.5)
         ));
     }
 
