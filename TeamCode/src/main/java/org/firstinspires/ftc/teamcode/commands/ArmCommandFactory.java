@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.subsystems.ClawRoll;
 
 public class ArmCommandFactory {
 
-    public static Command createSourceDrive(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+    public static Command createDriveMode(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
                 new SetArmAngleCommand(arm2, 160),
@@ -29,7 +29,7 @@ public class ArmCommandFactory {
     }
 
 
-    public static Command createSourceGroundJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+    public static Command createScoreGroundJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(() -> clawRoll.Upright()),
                 new InstantCommand(() -> clawPitch.setAngle(0)),
@@ -43,7 +43,7 @@ public class ArmCommandFactory {
         );
     }
 
-    public static Command createSourceLowJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+    public static Command createScoreLowJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
                 new SetArmAngleCommand(arm1, 55),
@@ -55,7 +55,7 @@ public class ArmCommandFactory {
         );
     }
 
-    public static Command createSourceMediumJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+    public static Command createScoreMediumJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
                 new SetArmAngleCommand(arm1, 95),
@@ -67,7 +67,7 @@ public class ArmCommandFactory {
         );
     }
 
-    public static Command createSourceHighFrontJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+    public static Command createScoreHighFrontJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
                 new SetArmAngleCommand(arm1, 160),
@@ -82,7 +82,7 @@ public class ArmCommandFactory {
         );
     }
 
-    public static Command createSourceHighBackJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+    public static Command createScoreHighBackJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new SetArmAngleCommand(arm1, 167),
                 new SequentialCommandGroup(
@@ -97,4 +97,89 @@ public class ArmCommandFactory {
                 )
         );
     }
+
+    public static Command createPickupCone1(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new InstantCommand(()-> clawRoll.Upright()),
+                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new ParallelCommandGroup(
+                                new SetArmAngleCommand(arm1, 0),
+                                new SetArmAngleCommand(arm2, 100)
+                        )
+                )
+        );
+    }
+
+    public static Command createPickupCone2(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new InstantCommand(()-> clawRoll.Upright()),
+                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new ParallelCommandGroup(
+                                new SetArmAngleCommand(arm1, 0),
+                                new SetArmAngleCommand(arm2, 100)
+                        )
+                )
+        );
+    }
+
+    public static Command createPickupCone3(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new InstantCommand(()-> clawRoll.Upright()),
+                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new ParallelCommandGroup(
+                                new SetArmAngleCommand(arm1, 0),
+                                new SetArmAngleCommand(arm2, 100)
+                        )
+                )
+        );
+    }
+
+    public static Command createPickupCone4(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new InstantCommand(()-> clawRoll.Upright()),
+                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new ParallelCommandGroup(
+                                new SetArmAngleCommand(arm1, 0),
+                                new SetArmAngleCommand(arm2, 100)
+                        )
+                )
+        );
+    }
+
+    public static Command createPickupCone5(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new InstantCommand(()-> clawRoll.Upright()),
+                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new ParallelCommandGroup(
+                                new SetArmAngleCommand(arm1, 0),
+                                new SetArmAngleCommand(arm2, 100)
+                        )
+                )
+        );
+    }
+
+    public static Command createPickupConeSideways(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new InstantCommand(()-> clawRoll.Upright()),
+                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new ParallelCommandGroup(
+                                new SetArmAngleCommand(arm1, 0),
+                                new SetArmAngleCommand(arm2, 100)
+                        )
+                )
+        );
+    }
+
 }

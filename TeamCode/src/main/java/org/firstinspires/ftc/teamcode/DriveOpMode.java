@@ -5,12 +5,10 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.command.SelectCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
-import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -19,7 +17,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.commands.ArmCommandFactory;
 import org.firstinspires.ftc.teamcode.commands.DriveWithGamepadCommand;
 import org.firstinspires.ftc.teamcode.commands.GrabConeCommand;
-import org.firstinspires.ftc.teamcode.commands.SetArmAngleCommand;
 import org.firstinspires.ftc.teamcode.subsystems.Arm;
 import org.firstinspires.ftc.teamcode.subsystems.Claw;
 import org.firstinspires.ftc.teamcode.subsystems.ClawPitch;
@@ -73,19 +70,11 @@ public class DriveOpMode extends CommandOpMode {
         {
             GamepadEx driver2 = new GamepadEx(gamepad2);
 
-            /*pickup from floor
-            driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new ParallelCommandGroup(
-                    new InstantCommand(()-> clawRoll.Upright()),
-                    new InstantCommand(()-> clawPitch.setAngle(0)),
-                    new SequentialCommandGroup(
-                            new WaitCommand(100),
-                            new ParallelCommandGroup(
-                                    new SetArmAngleCommand(arm1, 0),
-                                    new SetArmAngleCommand(arm2, 100)
-                            )
-                    )
-            ));
-            */
+            //pickup from floor
+            driver2.getGamepadButton(GamepadKeys.Button.X).whenPressed(
+                    ArmCommandFactory.createPickupConeSideways(clawRoll,clawPitch,arm1,arm2)
+            );
+            
             //
             // score select
             //
@@ -97,16 +86,16 @@ public class DriveOpMode extends CommandOpMode {
                     }
                 }),
                 new WaitCommand(100),
-                new ScheduleCommand(new SelectCommand(
+                new SelectCommand(
                         new HashMap<Object, Command>() {{
-                            put(1, ArmCommandFactory.createSourceGroundJunction(clawRoll,  clawPitch, arm1, arm2));
-                            put(2, ArmCommandFactory.createSourceLowJunction(clawRoll,  clawPitch, arm1, arm2));
-                            put(3, ArmCommandFactory.createSourceMediumJunction(clawRoll,  clawPitch, arm1, arm2));
-                            put(4, ArmCommandFactory.createSourceHighFrontJunction(clawRoll,  clawPitch, arm1, arm2));
-                            put(5, ArmCommandFactory.createSourceHighBackJunction(clawRoll,  clawPitch, arm1, arm2));
+                            put(1, new ScheduleCommand(ArmCommandFactory.createScoreGroundJunction(clawRoll,  clawPitch, arm1, arm2)));
+                            put(2, new ScheduleCommand(ArmCommandFactory.createScoreLowJunction(clawRoll,  clawPitch, arm1, arm2)));
+                            put(3, new ScheduleCommand(ArmCommandFactory.createScoreMediumJunction(clawRoll,  clawPitch, arm1, arm2)));
+                            put(4, new ScheduleCommand(ArmCommandFactory.createScoreHighFrontJunction(clawRoll,  clawPitch, arm1, arm2)));
+                            put(5, new ScheduleCommand(ArmCommandFactory.createScoreHighBackJunction(clawRoll,  clawPitch, arm1, arm2)));
                         }},
                         ()-> armScoreState
-                ))
+                )
             ));
 
             driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).and(driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)).whenActive(new SequentialCommandGroup(
@@ -116,16 +105,16 @@ public class DriveOpMode extends CommandOpMode {
                         }
                     }),
                     new WaitCommand(100),
-                    new ScheduleCommand(new SelectCommand(
+                            new SelectCommand(
                             new HashMap<Object, Command>() {{
-                                put(1, ArmCommandFactory.createSourceGroundJunction(clawRoll,  clawPitch, arm1, arm2));
-                                put(2, ArmCommandFactory.createSourceLowJunction(clawRoll,  clawPitch, arm1, arm2));
-                                put(3, ArmCommandFactory.createSourceMediumJunction(clawRoll,  clawPitch, arm1, arm2));
-                                put(4, ArmCommandFactory.createSourceHighFrontJunction(clawRoll,  clawPitch, arm1, arm2));
-                                put(5, ArmCommandFactory.createSourceHighBackJunction(clawRoll,  clawPitch, arm1, arm2));
+                                put(1, new ScheduleCommand(ArmCommandFactory.createScoreGroundJunction(clawRoll,  clawPitch, arm1, arm2)));
+                                put(2, new ScheduleCommand(ArmCommandFactory.createScoreLowJunction(clawRoll,  clawPitch, arm1, arm2)));
+                                put(3, new ScheduleCommand(ArmCommandFactory.createScoreMediumJunction(clawRoll,  clawPitch, arm1, arm2)));
+                                put(4, new ScheduleCommand(ArmCommandFactory.createScoreHighFrontJunction(clawRoll,  clawPitch, arm1, arm2)));
+                                put(5, new ScheduleCommand(ArmCommandFactory.createScoreHighBackJunction(clawRoll,  clawPitch, arm1, arm2)));
                             }},
                             ()-> armScoreState
-                    ))
+                    )
             ));
 
             //
@@ -140,11 +129,11 @@ public class DriveOpMode extends CommandOpMode {
                     new WaitCommand(100),
                     new SelectCommand(
                             new HashMap<Object, Command>() {{
-//                        put(1, ArmCommandFactory.createSourceGroundJunction(clawRoll,  clawPitch, arm1, arm2));
-//                        put(2, ArmCommandFactory.createSourceLowJunction(clawRoll,  clawPitch, arm1, arm2));
-//                        put(3, ArmCommandFactory.createSourceMediumJunction(clawRoll,  clawPitch, arm1, arm2));
-//                        put(4, ArmCommandFactory.createSourceHighFrontJunction(clawRoll,  clawPitch, arm1, arm2));
-//                        put(5, ArmCommandFactory.createSourceHighBackJunction(clawRoll,  clawPitch, arm1, arm2));
+                                put(1, new ScheduleCommand(ArmCommandFactory.createPickupCone1(clawRoll,  clawPitch, arm1, arm2)));
+                                put(2, new ScheduleCommand(ArmCommandFactory.createPickupCone2(clawRoll,  clawPitch, arm1, arm2)));
+                                put(3, new ScheduleCommand(ArmCommandFactory.createPickupCone3(clawRoll,  clawPitch, arm1, arm2)));
+                                put(4, new ScheduleCommand(ArmCommandFactory.createPickupCone4(clawRoll,  clawPitch, arm1, arm2)));
+                                put(5, new ScheduleCommand(ArmCommandFactory.createPickupCone5(clawRoll,  clawPitch, arm1, arm2)));
                             }},
                             ()-> armPickUpState
                     )
@@ -160,11 +149,11 @@ public class DriveOpMode extends CommandOpMode {
                     new WaitCommand(100),
                     new SelectCommand(
                             new HashMap<Object, Command>() {{
-//                        put(1, ArmCommandFactory.createSourceGroundJunction(clawRoll,  clawPitch, arm1, arm2));
-//                        put(2, ArmCommandFactory.createSourceLowJunction(clawRoll,  clawPitch, arm1, arm2));
-//                        put(3, ArmCommandFactory.createSourceMediumJunction(clawRoll,  clawPitch, arm1, arm2));
-//                        put(4, ArmCommandFactory.createSourceHighFrontJunction(clawRoll,  clawPitch, arm1, arm2));
-//                        put(5, ArmCommandFactory.createSourceHighBackJunction(clawRoll,  clawPitch, arm1, arm2));
+                                put(1, new ScheduleCommand(ArmCommandFactory.createPickupCone1(clawRoll,  clawPitch, arm1, arm2)));
+                                put(2, new ScheduleCommand(ArmCommandFactory.createPickupCone2(clawRoll,  clawPitch, arm1, arm2)));
+                                put(3, new ScheduleCommand(ArmCommandFactory.createPickupCone3(clawRoll,  clawPitch, arm1, arm2)));
+                                put(4, new ScheduleCommand(ArmCommandFactory.createPickupCone4(clawRoll,  clawPitch, arm1, arm2)));
+                                put(5, new ScheduleCommand(ArmCommandFactory.createPickupCone5(clawRoll,  clawPitch, arm1, arm2)));
                             }},
                             ()-> armPickUpState
                     )
@@ -174,15 +163,17 @@ public class DriveOpMode extends CommandOpMode {
             //
             // drive mde
             //
-            driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).and(driver2.getGamepadButton((GamepadKeys.Button.RIGHT_BUMPER))).negate().whenActive(new SequentialCommandGroup(
+            driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).or(driver2.getGamepadButton((GamepadKeys.Button.RIGHT_BUMPER))).negate().whenActive(new SequentialCommandGroup(
                     new InstantCommand(()->{
                         armScoreState = 0;
                         armPickUpState = 0;
                     }),
-                    ArmCommandFactory.createSourceDrive(clawRoll, clawPitch, arm1, arm2)
+                    ArmCommandFactory.createDriveMode(clawRoll, clawPitch, arm1, arm2)
             ));
 
         }
+        ArmCommandFactory.createDriveMode(clawRoll, clawPitch, arm1, arm2).schedule();
+
     }
 
     @Override
