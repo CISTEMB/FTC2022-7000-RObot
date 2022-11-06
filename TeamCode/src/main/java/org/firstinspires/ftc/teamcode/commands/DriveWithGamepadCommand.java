@@ -3,16 +3,19 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.teamcode.subsystems.Arm;
 import org.firstinspires.ftc.teamcode.subsystems.Drive;
 
 public class DriveWithGamepadCommand extends CommandBase {
 
     private Gamepad gamepad;
     private Drive drive;
+    private Arm arm;
 
-    public DriveWithGamepadCommand(Gamepad gamepad, Drive drive) {
+    public DriveWithGamepadCommand(Gamepad gamepad, Drive drive, Arm arm) {
         this.gamepad = gamepad;
         this.drive = drive;
+        this.arm = arm;
         addRequirements(drive);
     }
 
@@ -28,10 +31,10 @@ public class DriveWithGamepadCommand extends CommandBase {
         double strafe = gamepad.left_stick_x;
         forward = -forward;
 
-        if (gamepad.left_bumper){
-            forward *= 0.75;
-            turn *= 0.35;
-            strafe *= 0.75;
+        if (arm.getAngle().getDegrees() >= 20){
+            forward *= 0.5;
+            turn *= 0.40;
+            strafe *= 0.5;
         }
 
         if (Math.abs(strafe) <= Math.abs(forward)){

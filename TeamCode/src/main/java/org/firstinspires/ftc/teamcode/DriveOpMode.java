@@ -44,7 +44,7 @@ public class DriveOpMode extends CommandOpMode {
         clawRoll = new ClawRoll(hardwareMap);
 
         drive.setDefaultCommand(
-                new DriveWithGamepadCommand(gamepad1, drive)
+                new DriveWithGamepadCommand(gamepad1, drive, arm1)
         );
 
         // Driver 1
