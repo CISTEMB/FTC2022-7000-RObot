@@ -10,12 +10,12 @@ public class DriveWithGamepadCommand extends CommandBase {
 
     private Gamepad gamepad;
     private Drive drive;
-    private Arm arm1;
+    private Arm arm;
 
-    public DriveWithGamepadCommand(Gamepad gamepad, Drive drive, Arm arm1) {
+    public DriveWithGamepadCommand(Gamepad gamepad, Drive drive, Arm arm) {
         this.gamepad = gamepad;
         this.drive = drive;
-        this.arm1 = arm1;
+        this.arm = arm;
         addRequirements(drive);
     }
 
@@ -33,7 +33,6 @@ public class DriveWithGamepadCommand extends CommandBase {
 
         if (gamepad.left_bumper || arm1.getAngle().getDegrees() > 20){
             forward *= 0.75;
-            turn *= 0.35;
             strafe *= 0.75;
         }
 
