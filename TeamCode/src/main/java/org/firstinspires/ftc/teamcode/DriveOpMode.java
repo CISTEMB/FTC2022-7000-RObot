@@ -4,7 +4,9 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.PrintCommand;
 import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.command.SelectCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -50,7 +52,7 @@ public class DriveOpMode extends CommandOpMode {
         clawRoll = new ClawRoll(hardwareMap);
 
         drive.setDefaultCommand(
-                new DriveWithGamepadCommand(gamepad1, drive)
+                new DriveWithGamepadCommand(gamepad1, drive, arm1)
         );
 
         // Driver 1
@@ -72,9 +74,12 @@ public class DriveOpMode extends CommandOpMode {
 
             //pickup from floor
             driver2.getGamepadButton(GamepadKeys.Button.X).whenPressed(
-                    ArmCommandFactory.createPickupConeSideways(clawRoll,clawPitch,arm1,arm2)
+                    ArmCommandFactory.createPickupConeSideways(claw, clawRoll,clawPitch,arm1,arm2)
             );
-            
+            driver2.getGamepadButton(GamepadKeys.Button.X).whenReleased(
+                    ArmCommandFactory.createDriveMode(clawRoll, clawPitch, arm1, arm2)
+            );
+
             //
             // score select
             //
@@ -122,7 +127,7 @@ public class DriveOpMode extends CommandOpMode {
             //
             driver2.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)).whenActive(new ScheduleCommand(new SequentialCommandGroup(
                     new InstantCommand(()-> {
-                        if(armPickUpState < 5) {
+                        if(armPickUpState < 6) {
                             armPickUpState++;
                         }
                     }),
@@ -134,6 +139,7 @@ public class DriveOpMode extends CommandOpMode {
                                 put(3, new ScheduleCommand(ArmCommandFactory.createPickupCone3(clawRoll,  clawPitch, arm1, arm2)));
                                 put(4, new ScheduleCommand(ArmCommandFactory.createPickupCone4(clawRoll,  clawPitch, arm1, arm2)));
                                 put(5, new ScheduleCommand(ArmCommandFactory.createPickupCone5(clawRoll,  clawPitch, arm1, arm2)));
+                                put(6, new ScheduleCommand(ArmCommandFactory.createPickupCone6(clawRoll,  clawPitch, arm1, arm2)));
                             }},
                             ()-> armPickUpState
                     )
@@ -145,6 +151,10 @@ public class DriveOpMode extends CommandOpMode {
                         if(armPickUpState > 1) {
                             armPickUpState--;
                         }
+
+                        if (armPickUpState == 0) {
+                            armPickUpState = 1;
+                        }
                     }),
                     new WaitCommand(100),
                     new SelectCommand(
@@ -154,6 +164,7 @@ public class DriveOpMode extends CommandOpMode {
                                 put(3, new ScheduleCommand(ArmCommandFactory.createPickupCone3(clawRoll,  clawPitch, arm1, arm2)));
                                 put(4, new ScheduleCommand(ArmCommandFactory.createPickupCone4(clawRoll,  clawPitch, arm1, arm2)));
                                 put(5, new ScheduleCommand(ArmCommandFactory.createPickupCone5(clawRoll,  clawPitch, arm1, arm2)));
+                                put(6, new ScheduleCommand(ArmCommandFactory.createPickupCone6(clawRoll,  clawPitch, arm1, arm2)));
                             }},
                             ()-> armPickUpState
                     )
@@ -164,6 +175,11 @@ public class DriveOpMode extends CommandOpMode {
             // drive mde
             //
             driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).or(driver2.getGamepadButton((GamepadKeys.Button.RIGHT_BUMPER))).negate().whenActive(new SequentialCommandGroup(
+                    new ConditionalCommand(
+                            ArmCommandFactory.createPickupCone6(clawRoll, clawPitch, arm1, arm2).withTimeout(250),
+                            new PrintCommand("false"),
+                            () -> armPickUpState >= 4
+                    ),
                     new InstantCommand(()->{
                         armScoreState = 0;
                         armPickUpState = 0;
@@ -180,6 +196,8 @@ public class DriveOpMode extends CommandOpMode {
     public void run() {
         super.run();
         telemetry.addData("armScoreState", armScoreState);
+        telemetry.addData("armPickUpState", armPickUpState);
+
         telemetry.update();
     }
 }

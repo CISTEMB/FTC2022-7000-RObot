@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.commands.ArmCommandFactory;
 import org.firstinspires.ftc.teamcode.commands.DriveForwardCommand;
 import org.firstinspires.ftc.teamcode.commands.DriveStrafeCommand;
 import org.firstinspires.ftc.teamcode.commands.DriveWithGamepadCommand;
@@ -41,11 +42,25 @@ public class AutoOpMode extends CommandOpMode {
 
     private Drive drive;
     OpenCvWebcam webcam;
+    private Arm arm1;
+    private Arm arm2;
+    private Claw claw;
+    private ClawPitch clawPitch;
+    private ClawRoll clawRoll;
+
 
     @Override
     public void initialize(){
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         drive=new Drive(hardwareMap,telemetry);
+        arm1 = new Arm(hardwareMap, telemetry, "Arm1", "arm1Pot", "fEncoder", 16,1, 180, DcMotorSimple.Direction.REVERSE, Arm.ARM1_PID, 1, -1);
+        arm2 = new Arm(hardwareMap, telemetry, "Arm2","arm2Pot", "lEncoder", 90, 1, 155, DcMotorSimple.Direction.FORWARD, Arm.ARM2_PID, 0.75, -0.75);
+        claw = new Claw(hardwareMap);
+        clawPitch = new ClawPitch(hardwareMap);
+        clawRoll = new ClawRoll(hardwareMap);
+        ArmCommandFactory.createDriveMode(clawRoll, clawPitch, arm1, arm2).schedule();
+
+        claw.Grab();
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
          * In this sample, we're using a webcam. Note that you will need to

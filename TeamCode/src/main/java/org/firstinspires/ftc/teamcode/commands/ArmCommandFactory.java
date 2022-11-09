@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.subsystems.Arm;
+import org.firstinspires.ftc.teamcode.subsystems.Claw;
 import org.firstinspires.ftc.teamcode.subsystems.ClawPitch;
 import org.firstinspires.ftc.teamcode.subsystems.ClawRoll;
 
@@ -120,7 +121,7 @@ public class ArmCommandFactory {
                         new WaitCommand(100),
                         new ParallelCommandGroup(
                                 new SetArmAngleCommand(arm1, 0),
-                                new SetArmAngleCommand(arm2, 100)
+                                new SetArmAngleCommand(arm2, 110)
                         )
                 )
         );
@@ -134,7 +135,7 @@ public class ArmCommandFactory {
                         new WaitCommand(100),
                         new ParallelCommandGroup(
                                 new SetArmAngleCommand(arm1, 0),
-                                new SetArmAngleCommand(arm2, 100)
+                                new SetArmAngleCommand(arm2, 115)
                         )
                 )
         );
@@ -143,12 +144,12 @@ public class ArmCommandFactory {
     public static Command createPickupCone4(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new InstantCommand(()-> clawPitch.setAngle(20)),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
                                 new SetArmAngleCommand(arm1, 0),
-                                new SetArmAngleCommand(arm2, 100)
+                                new SetArmAngleCommand(arm2, 125)
                         )
                 )
         );
@@ -157,26 +158,41 @@ public class ArmCommandFactory {
     public static Command createPickupCone5(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new InstantCommand(()-> clawPitch.setAngle(30)),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
                                 new SetArmAngleCommand(arm1, 0),
-                                new SetArmAngleCommand(arm2, 100)
+                                new SetArmAngleCommand(arm2, 135)
                         )
                 )
         );
     }
 
-    public static Command createPickupConeSideways(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+    public static Command createPickupCone6(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new InstantCommand(()-> clawPitch.setAngle(45)),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
-                                new SetArmAngleCommand(arm1, 0),
-                                new SetArmAngleCommand(arm2, 100)
+                                new SetArmAngleCommand(arm1, 16),
+                                new SetArmAngleCommand(arm2, 143)
+                        )
+                )
+        );
+    }
+
+    public static Command createPickupConeSideways(Claw claw, ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new InstantCommand(()-> clawRoll.Upright(), clawRoll),
+                new InstantCommand(()-> claw.Release(), claw),
+                new InstantCommand(()-> clawPitch.setAngle(90), clawPitch),
+                new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new ParallelCommandGroup(
+                                new SetArmAngleCommand(arm1, 40),
+                                new SetArmAngleCommand(arm2, 52)
                         )
                 )
         );
