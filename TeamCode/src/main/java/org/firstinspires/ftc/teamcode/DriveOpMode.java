@@ -72,12 +72,21 @@ public class DriveOpMode extends CommandOpMode {
         {
             GamepadEx driver2 = new GamepadEx(gamepad2);
 
+            //fast high back score
+            driver2.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
+                    ArmCommandFactory.createScoreHighBackJunction(clawRoll,clawPitch,arm1,arm2)
+            );
+            driver2.getGamepadButton(GamepadKeys.Button.Y).whenReleased(
+                    ArmCommandFactory.createDriveModeFromHighRear(clawRoll, clawPitch, arm1, arm2)
+            );
+
+
             //pickup from floor
             driver2.getGamepadButton(GamepadKeys.Button.X).whenPressed(
                     ArmCommandFactory.createPickupConeSideways(claw, clawRoll,clawPitch,arm1,arm2)
             );
             driver2.getGamepadButton(GamepadKeys.Button.X).whenReleased(
-                    ArmCommandFactory.createDriveMode(clawRoll, clawPitch, arm1, arm2)
+                    ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)
             );
 
             //
@@ -86,7 +95,7 @@ public class DriveOpMode extends CommandOpMode {
 
             driver2.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)).whenActive(new SequentialCommandGroup(
                 new InstantCommand(()-> {
-                    if(armScoreState < 5) {
+                    if(armScoreState < 4) {
                         armScoreState++;
                     }
                 }),
@@ -97,7 +106,6 @@ public class DriveOpMode extends CommandOpMode {
                             put(2, new ScheduleCommand(ArmCommandFactory.createScoreLowJunction(clawRoll,  clawPitch, arm1, arm2)));
                             put(3, new ScheduleCommand(ArmCommandFactory.createScoreMediumJunction(clawRoll,  clawPitch, arm1, arm2)));
                             put(4, new ScheduleCommand(ArmCommandFactory.createScoreHighFrontJunction(clawRoll,  clawPitch, arm1, arm2)));
-                            put(5, new ScheduleCommand(ArmCommandFactory.createScoreHighBackJunction(clawRoll,  clawPitch, arm1, arm2)));
                         }},
                         ()-> armScoreState
                 )
@@ -116,7 +124,6 @@ public class DriveOpMode extends CommandOpMode {
                                 put(2, new ScheduleCommand(ArmCommandFactory.createScoreLowJunction(clawRoll,  clawPitch, arm1, arm2)));
                                 put(3, new ScheduleCommand(ArmCommandFactory.createScoreMediumJunction(clawRoll,  clawPitch, arm1, arm2)));
                                 put(4, new ScheduleCommand(ArmCommandFactory.createScoreHighFrontJunction(clawRoll,  clawPitch, arm1, arm2)));
-                                put(5, new ScheduleCommand(ArmCommandFactory.createScoreHighBackJunction(clawRoll,  clawPitch, arm1, arm2)));
                             }},
                             ()-> armScoreState
                     )
@@ -184,11 +191,11 @@ public class DriveOpMode extends CommandOpMode {
                         armScoreState = 0;
                         armPickUpState = 0;
                     }),
-                    ArmCommandFactory.createDriveMode(clawRoll, clawPitch, arm1, arm2)
+                    ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)
             ));
 
         }
-        ArmCommandFactory.createDriveMode(clawRoll, clawPitch, arm1, arm2).schedule();
+        ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2).schedule();
 
     }
 

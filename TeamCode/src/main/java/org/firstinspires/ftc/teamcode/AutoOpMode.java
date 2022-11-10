@@ -58,7 +58,7 @@ public class AutoOpMode extends CommandOpMode {
         claw = new Claw(hardwareMap);
         clawPitch = new ClawPitch(hardwareMap);
         clawRoll = new ClawRoll(hardwareMap);
-        ArmCommandFactory.createDriveMode(clawRoll, clawPitch, arm1, arm2).schedule();
+        ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2).schedule();
 
         claw.Grab();
         /*

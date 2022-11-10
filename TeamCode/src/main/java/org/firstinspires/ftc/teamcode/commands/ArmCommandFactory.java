@@ -14,13 +14,31 @@ import org.firstinspires.ftc.teamcode.subsystems.ClawRoll;
 
 public class ArmCommandFactory {
 
-    public static Command createDriveMode(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+    public static Command createDriveModeFromFront(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
                 new SetArmAngleCommand(arm2, 160),
                 new SequentialCommandGroup(
                         new WaitUntilCommand(() -> arm2.getAngle().getDegrees() > 145),
                         new SetArmAngleCommand(arm1, 1)
+                ),
+                new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new InstantCommand(()-> clawPitch.setAngle(60))
+                )
+        );
+    }
+
+    public static Command createDriveModeFromHighRear(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> arm1.getAngle().getDegrees() < 145),
+                        new InstantCommand(()-> clawRoll.Upright())
+                ),
+                new SetArmAngleCommand(arm1, 1),
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> arm1.getAngle().getDegrees() < 155),
+                        new SetArmAngleCommand(arm2, 160)
                 ),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
