@@ -13,6 +13,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
@@ -31,6 +32,7 @@ import java.util.HashMap;
 
 public class DriveOpMode extends CommandOpMode {
 
+    private RevBlinkinLedDriver leds;
     private Drive drive;
     private Arm arm1;
     private Arm arm2;
@@ -50,6 +52,8 @@ public class DriveOpMode extends CommandOpMode {
         claw = new Claw(hardwareMap);
         clawPitch = new ClawPitch(hardwareMap);
         clawRoll = new ClawRoll(hardwareMap);
+        leds = hardwareMap.get(RevBlinkinLedDriver.class, "Blingin");   
+        leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.TWINKLES_OCEAN_PALETTE );
 
         drive.setDefaultCommand(
                 new DriveWithGamepadCommand(gamepad1, drive, arm1)

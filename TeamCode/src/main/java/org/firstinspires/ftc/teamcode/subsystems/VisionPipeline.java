@@ -36,6 +36,8 @@ public class VisionPipeline extends OpenCvPipeline {
         return markerPlacement;
     }
 
+    private RevBlinkinLedDriver leds;
+
     /*
      * Cache
      */
@@ -45,6 +47,8 @@ public class VisionPipeline extends OpenCvPipeline {
 
     public VisionPipeline(HardwareMap hardwareMap, Telemetry telemetry){
         this.telemetry = telemetry;
+
+        leds = hardwareMap.get(RevBlinkinLedDriver.class, "Blingin");
 
     }
 
@@ -107,6 +111,19 @@ public class VisionPipeline extends OpenCvPipeline {
         // Annotate the source image
         //
         input.copyTo(output);
+
+        if (markerPlacement == MarkerPlacement.LOCATION_1) {
+            // blue/amber
+            leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+        } else if (markerPlacement == MarkerPlacement.LOCATION_2) {
+            // green
+            leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+        } else if (markerPlacement == MarkerPlacement.LOCATION_3) {
+            // red
+            leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+        } else {
+            leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_WHITE);
+        }
 
         Aruco.drawDetectedMarkers(output, markerCorners, markerIDs);
         return output;
