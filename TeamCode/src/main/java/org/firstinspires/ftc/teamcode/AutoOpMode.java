@@ -61,6 +61,7 @@ public class AutoOpMode extends CommandOpMode {
         ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2).schedule();
 
         claw.Grab();
+        //clawPitch.setAngle(0);
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
          * In this sample, we're using a webcam. Note that you will need to
@@ -142,7 +143,8 @@ public class AutoOpMode extends CommandOpMode {
                     () -> waitForVisionCommand.getPlacement()
             ),
             new DriveForwardCommand(telemetry, drive, -1, 0.5),
-            new DriveForwardCommand(telemetry, drive, 36, 0.5)
+            new DriveForwardCommand(telemetry, drive, 36, 0.5),
+            ArmCommandFactory.createPickupCone1(clawRoll, clawPitch, arm1, arm2)
         ));
     }
 

@@ -59,6 +59,8 @@ public class DriveOpMode extends CommandOpMode {
                 new DriveWithGamepadCommand(gamepad1, drive, arm1)
         );
 
+        claw.Grab();
+
         // Driver 1
         {
             GamepadEx driver = new GamepadEx(gamepad1);
