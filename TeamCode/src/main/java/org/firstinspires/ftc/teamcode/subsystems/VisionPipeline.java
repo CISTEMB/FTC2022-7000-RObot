@@ -36,6 +36,8 @@ public class VisionPipeline extends OpenCvPipeline {
         return markerPlacement;
     }
 
+    private DigitalChannel redLED;
+    private DigitalChannel greenLED;
     private RevBlinkinLedDriver leds;
 
     /*
@@ -46,9 +48,15 @@ public class VisionPipeline extends OpenCvPipeline {
     private Telemetry telemetry;
 
     public VisionPipeline(HardwareMap hardwareMap, Telemetry telemetry){
-        this.telemetry = telemetry;
+        redLED = hardwareMap.get(DigitalChannel.class, "red");
+        greenLED = hardwareMap.get(DigitalChannel.class, "green");
 
+        // change LED mode from input to output
+        redLED.setMode(DigitalChannel.Mode.OUTPUT);
+        greenLED.setMode(DigitalChannel.Mode.OUTPUT);
         leds = hardwareMap.get(RevBlinkinLedDriver.class, "Blingin");
+
+        this.telemetry = telemetry;
 
     }
 
@@ -113,15 +121,23 @@ public class VisionPipeline extends OpenCvPipeline {
         input.copyTo(output);
 
         if (markerPlacement == MarkerPlacement.LOCATION_1) {
-            // blue/amber
-            leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+            // blue, amber
+            redLED.setState(false);
+            greenLED.setState(false);
+            leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
         } else if (markerPlacement == MarkerPlacement.LOCATION_2) {
             // green
+            redLED.setState(false);
+            greenLED.setState(true);
             leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
         } else if (markerPlacement == MarkerPlacement.LOCATION_3) {
             // red
+            greenLED.setState(false);
+            redLED.setState(true);
             leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
         } else {
+            greenLED.setState(true);
+            redLED.setState(true);
             leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_WHITE);
         }
 

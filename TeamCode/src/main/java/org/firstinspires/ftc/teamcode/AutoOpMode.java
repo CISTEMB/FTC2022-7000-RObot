@@ -111,7 +111,7 @@ public class AutoOpMode extends CommandOpMode {
                  * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
                  * away from the user.
                  */
-                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
@@ -129,6 +129,9 @@ public class AutoOpMode extends CommandOpMode {
             // 0. scan marker, up to 5 sec
             waitForVisionCommand.withTimeout(5000),
 
+            new DriveForwardCommand(telemetry, drive, 1, 0.5),
+
+            new DriveStrafeCommand(telemetry, drive, 300, 0.5),
             new MapSelectCommand<>(
                     ImmutableMap.of(
                             VisionPipeline.MarkerPlacement.LOCATION_1, new DriveStrafeCommand(telemetry, drive, -1500, 0.5),
@@ -138,7 +141,7 @@ public class AutoOpMode extends CommandOpMode {
                     ),
                     () -> waitForVisionCommand.getPlacement()
             ),
-
+            new DriveForwardCommand(telemetry, drive, -1, 0.5),
             new DriveForwardCommand(telemetry, drive, 36, 0.5)
         ));
     }

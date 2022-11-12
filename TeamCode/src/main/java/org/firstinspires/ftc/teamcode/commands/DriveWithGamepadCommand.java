@@ -32,9 +32,14 @@ public class DriveWithGamepadCommand extends CommandBase {
         forward = -forward;
 
         if (gamepad.left_bumper || arm.getAngle().getDegrees() > 20){
-            forward *= 0.75;
-            turn *= 0.4;
-            strafe *= 0.75;
+            forward *= 0.65;
+            turn *= 0.5;
+            strafe *= 0.65;
+        }
+        else {
+            forward *= 0.8;
+            turn *= 0.75;
+            strafe *= 0.8;
         }
 
         if (Math.abs(strafe) <= Math.abs(forward)){

@@ -24,7 +24,7 @@ public class ArmCommandFactory {
                 ),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
-                        new InstantCommand(()-> clawPitch.setAngle(60))
+                        new InstantCommand(()-> clawPitch.setAngle(0))
                 )
         );
     }
@@ -42,7 +42,7 @@ public class ArmCommandFactory {
                 ),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
-                        new InstantCommand(()-> clawPitch.setAngle(60))
+                        new InstantCommand(()-> clawPitch.setAngle(0))
                 )
         );
     }

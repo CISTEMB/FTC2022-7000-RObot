@@ -52,7 +52,7 @@ public class DriveOpMode extends CommandOpMode {
         claw = new Claw(hardwareMap);
         clawPitch = new ClawPitch(hardwareMap);
         clawRoll = new ClawRoll(hardwareMap);
-        leds = hardwareMap.get(RevBlinkinLedDriver.class, "Blingin");   
+        leds = hardwareMap.get(RevBlinkinLedDriver.class, "Blingin");
         leds.setPattern(RevBlinkinLedDriver.BlinkinPattern.TWINKLES_OCEAN_PALETTE );
 
         drive.setDefaultCommand(
