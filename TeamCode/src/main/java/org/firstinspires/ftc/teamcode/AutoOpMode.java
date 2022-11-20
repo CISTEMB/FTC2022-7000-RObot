@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.MapSelectCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
@@ -144,6 +145,14 @@ public class AutoOpMode extends CommandOpMode {
             ),
             new DriveForwardCommand(telemetry, drive, -1, 0.5),
             new DriveForwardCommand(telemetry, drive, 36, 0.5),
+            new ConditionalCommand(
+                new SequentialCommandGroup(
+                    new DriveForwardCommand(telemetry, drive, 12, 0.5),
+                    new DriveForwardCommand(telemetry, drive, -12, 0.5)
+                ),
+                new PrintCommand("false"),
+                () -> waitForVisionCommand.getPlacement() == VisionPipeline.MarkerPlacement.LOCATION_2
+            ),
             ArmCommandFactory.createPickupCone1(clawRoll, clawPitch, arm1, arm2)
         ));
     }

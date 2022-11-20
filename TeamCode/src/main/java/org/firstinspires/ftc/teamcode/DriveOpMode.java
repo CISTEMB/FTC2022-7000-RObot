@@ -185,7 +185,7 @@ public class DriveOpMode extends CommandOpMode {
             )));
 
             //
-            // drive mde
+            // drive mode
             //
             driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).or(driver2.getGamepadButton((GamepadKeys.Button.RIGHT_BUMPER))).negate().whenActive(new SequentialCommandGroup(
                     new ConditionalCommand(

@@ -65,11 +65,11 @@ public class ArmCommandFactory {
     public static Command createScoreLowJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new SetArmAngleCommand(arm1, 55),
+                new SetArmAngleCommand(arm1, 50),
                 new SetArmAngleCommand(arm2, 120),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
-                        new InstantCommand(()-> clawPitch.setAngle(65))
+                        new InstantCommand(()-> clawPitch.setAngle(70))
                 )
         );
     }
@@ -81,7 +81,7 @@ public class ArmCommandFactory {
                 new SequentialCommandGroup(
                         new WaitCommand(300),
                         new SetArmAngleCommand(arm2, 85),
-                        new InstantCommand(()-> clawPitch.setAngle(60), clawPitch)
+                        new InstantCommand(()-> clawPitch.setAngle(660), clawPitch)
                 )
         );
     }
