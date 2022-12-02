@@ -80,12 +80,12 @@ public class Arm extends SubsystemBase {
         controller = new PIDFController(pidCoefficients.p, pidCoefficients.i, pidCoefficients.d, 0);
     }
 
-    public Rotation2d getAngle() {
+    public double getAngle() {
 
         final double potentiometerAngle = angleLookup.get(pot.getVoltage());
 
        // return potentiometerAngle - potOffset;
-        return Rotation2d.fromDegrees(potentiometerAngle - potOffset);
+        return (potentiometerAngle - potOffset);
     }
 
     public void setPower(double power){
@@ -109,10 +109,10 @@ public class Arm extends SubsystemBase {
         double output;
         if (pidEnabled) {
              output = controller.calculate(
-                    getAngle().getDegrees(), setPoint
+                    getAngle(), setPoint
             );
 
-             double feedForward = getAngle().getSin() * pidCoefficients.f;
+             double feedForward = 0;//getAngle().getSin() * pidCoefficients.f;
              output = output + feedForward;
 
              t.addData(name + "PIDOutput", output);
@@ -124,11 +124,11 @@ public class Arm extends SubsystemBase {
             output = openLoopPower;
         }
 
-        if ((output < 0) && (getAngle().getDegrees() <= softLowLimit)) {
+        if ((output < 0) && (getAngle() <= softLowLimit)) {
             output = 0;
         }
 
-        if ((output > 0) && (getAngle().getDegrees() >= softHighLimit)) {
+        if ((output > 0) && (getAngle() >= softHighLimit)) {
             output = 0;
         }
 
@@ -143,7 +143,7 @@ public class Arm extends SubsystemBase {
         pivotMotor.setPower(output);
 
         //telemetry
-        t.addData(name+"Angle", getAngle().getDegrees());
+        t.addData(name+"Angle", getAngle());
         t.addData(name+"Voltage", pot.getVoltage());
     }
 }

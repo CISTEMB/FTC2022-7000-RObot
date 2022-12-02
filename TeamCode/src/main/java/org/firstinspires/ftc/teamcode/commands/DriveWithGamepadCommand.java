@@ -31,7 +31,7 @@ public class DriveWithGamepadCommand extends CommandBase {
         double strafe = gamepad.left_stick_x;
         forward = -forward;
 
-        if (gamepad.left_bumper || arm.getAngle().getDegrees() > 20){
+        if (gamepad.left_bumper || arm.getAngle() > 20){
             forward *= 0.65;
             turn *= 0.5;
             strafe *= 0.65;
