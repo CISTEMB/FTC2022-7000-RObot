@@ -117,7 +117,7 @@ public class DriveOpMode extends CommandOpMode {
                     }),
                     new SelectCommand(
                             new HashMap<Object, Command>() {{
-                              put(1, new ScheduleCommand(ArmCommandFactory.createPickupConeFarReady(clawRoll, clawPitch, arm1, arm2)));
+                              put(1, new ScheduleCommand(ArmCommandFactory.createPickupConeFarReady(claw, clawRoll, clawPitch, arm1, arm2)));
                               put(0, new ScheduleCommand(ArmCommandFactory.createPickupConeFar(clawRoll, clawPitch, arm1, arm2)));
                             }},
                             ()-> farPickUpState
@@ -225,6 +225,7 @@ public class DriveOpMode extends CommandOpMode {
                     new InstantCommand(()->{
                         armScoreState = 0;
                         armPickUpState = 0;
+                        farPickUpState = 0;
                     }),
                     ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)
             ));

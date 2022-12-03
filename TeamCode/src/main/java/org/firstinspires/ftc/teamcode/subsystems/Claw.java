@@ -10,6 +10,7 @@ public class Claw extends SubsystemBase {
 
     public static double GRAB = 0;
     public static double RELEASE = 0.5;
+    public static double BIG_RELEASE = 0.8;
 
     private Servo servo;
 
@@ -24,5 +25,9 @@ public class Claw extends SubsystemBase {
 
     public void Release() {
         servo.setPosition(RELEASE);
+    }
+
+    public void BigRelease() {
+        servo.setPosition(BIG_RELEASE);
     }
 }
