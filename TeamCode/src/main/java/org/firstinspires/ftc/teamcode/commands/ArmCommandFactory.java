@@ -51,7 +51,7 @@ public class ArmCommandFactory {
     public static Command createDriveModeFromHighRear(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> arm1.getAngle() < 145),
+                        new WaitUntilCommand(() -> arm1.getAngle() < 115),
                         new InstantCommand(()-> clawRoll.Upright())
                 ),
                 new SetArmAngleCommand(arm1, 1),
@@ -167,7 +167,7 @@ public class ArmCommandFactory {
     public static Command createPickupCone1(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new InstantCommand(()-> clawPitch.setAngle(0+15)),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
@@ -181,7 +181,7 @@ public class ArmCommandFactory {
     public static Command createPickupCone2(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new InstantCommand(()-> clawPitch.setAngle(0+15)),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
@@ -195,7 +195,7 @@ public class ArmCommandFactory {
     public static Command createPickupCone3(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new InstantCommand(()-> clawPitch.setAngle(0)),
+                new InstantCommand(()-> clawPitch.setAngle(0+15)),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
@@ -209,7 +209,7 @@ public class ArmCommandFactory {
     public static Command createPickupCone4(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new InstantCommand(()-> clawPitch.setAngle(20)),
+                new InstantCommand(()-> clawPitch.setAngle(20+15)),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
@@ -223,7 +223,7 @@ public class ArmCommandFactory {
     public static Command createPickupCone5(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new InstantCommand(()-> clawPitch.setAngle(30)),
+                new InstantCommand(()-> clawPitch.setAngle(30+15)),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
@@ -237,7 +237,7 @@ public class ArmCommandFactory {
     public static Command createPickupCone6(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new InstantCommand(()-> clawPitch.setAngle(45)),
+                new InstantCommand(()-> clawPitch.setAngle(45+15)),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(

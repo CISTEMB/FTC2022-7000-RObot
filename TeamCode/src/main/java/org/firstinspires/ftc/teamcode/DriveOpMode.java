@@ -44,6 +44,9 @@ public class DriveOpMode extends CommandOpMode {
     private int armPickUpState;
     private int farPickUpState;
 
+    private boolean wasAtHighRear = false;
+    private boolean atHighRear = false;
+
     @Override
     public void initialize(){
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -81,12 +84,14 @@ public class DriveOpMode extends CommandOpMode {
 
             //fast high back score
             driver2.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
-                    ArmCommandFactory.createScoreHighBackJunction(clawRoll,clawPitch,arm1,arm2)
+                    new SequentialCommandGroup(
+                        new InstantCommand(()->{
+                            atHighRear = true;
+                            farPickUpState = 0;
+                        }),
+                        ArmCommandFactory.createScoreHighBackJunction(clawRoll,clawPitch,arm1,arm2)
+                    )
             );
-            driver2.getGamepadButton(GamepadKeys.Button.Y).whenReleased(
-                    ArmCommandFactory.createDriveModeFromHighRear(clawRoll, clawPitch, arm1, arm2)
-            );
-
 
             //pickup from floor
             driver2.getGamepadButton(GamepadKeys.Button.X).whenPressed(
@@ -226,8 +231,16 @@ public class DriveOpMode extends CommandOpMode {
                         armScoreState = 0;
                         armPickUpState = 0;
                         farPickUpState = 0;
+
+                        wasAtHighRear = atHighRear;
+                        atHighRear = false;
                     }),
-                    ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)
+
+                    new ConditionalCommand(
+                            ArmCommandFactory.createDriveModeFromHighRear(clawRoll, clawPitch, arm1, arm2),
+                            ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2),
+                            () -> wasAtHighRear
+                    )
             ));
 
         }

@@ -16,6 +16,14 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Arm extends SubsystemBase {
+
+//    public enum ArmState {
+//        kDriveModeFromFront,
+//        kDriveModeFromFar,
+//        kDriveModeFromHighRear,
+//        k
+//    }
+
     public static PIDFCoefficients ARM1_PID = new PIDFCoefficients(0.07, 0, 0,0);
     public static PIDFCoefficients ARM2_PID = new PIDFCoefficients(0.033, 0,0 ,0);
 
