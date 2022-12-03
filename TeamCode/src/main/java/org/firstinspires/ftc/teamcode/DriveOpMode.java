@@ -100,7 +100,7 @@ public class DriveOpMode extends CommandOpMode {
                     ArmCommandFactory.createPickupConeFar(clawRoll, clawPitch, arm1, arm2)
             );
             driver2.getGamepadButton(GamepadKeys.Button.B).whenReleased(
-                    ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)
+                    ArmCommandFactory.createDriveModeFromFar(clawRoll, clawPitch, arm1, arm2)
             );
 
             //

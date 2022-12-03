@@ -24,7 +24,25 @@ public class ArmCommandFactory {
                 ),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
-                        new InstantCommand(()-> clawPitch.setAngle(0))
+                        new InstantCommand(()-> clawPitch.setAngle(20))
+                )
+        );
+    }
+
+    public static Command createDriveModeFromFar(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new InstantCommand(()-> clawRoll.Upright()),
+                new SequentialCommandGroup(
+                        new SetArmAngleCommand(arm2, 160).interruptOn(() -> arm2.getAngle() > 155),
+                        new SetArmAngleCommand(arm2, 160)
+                ),
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> arm2.getAngle() > 100),
+                        new SetArmAngleCommand(arm1, 1)
+                ),
+                new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new InstantCommand(()-> clawPitch.setAngle(20))
                 )
         );
     }
@@ -46,7 +64,6 @@ public class ArmCommandFactory {
                 )
         );
     }
-
 
     public static Command createScoreGroundJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
@@ -116,6 +133,7 @@ public class ArmCommandFactory {
                 )
         );
     }
+
     public static Command createPickupConeFar(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
