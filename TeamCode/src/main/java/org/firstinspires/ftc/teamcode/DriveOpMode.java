@@ -42,6 +42,7 @@ public class DriveOpMode extends CommandOpMode {
 
     private int armScoreState;
     private int armPickUpState;
+    private int farPickUpState;
 
     @Override
     public void initialize(){
@@ -96,12 +97,32 @@ public class DriveOpMode extends CommandOpMode {
             );
 
             //pickup from far
-            driver2.getGamepadButton(GamepadKeys.Button.B).whenPressed(
-                    ArmCommandFactory.createPickupConeFar(clawRoll, clawPitch, arm1, arm2)
-            );
-            driver2.getGamepadButton(GamepadKeys.Button.B).whenReleased(
-                    ArmCommandFactory.createDriveModeFromFar(clawRoll, clawPitch, arm1, arm2)
-            );
+//            driver2.getGamepadButton(GamepadKeys.Button.B).whenPressed(
+//                    ArmCommandFactory.createPickupConeFar(clawRoll, clawPitch, arm1, arm2)
+//            );
+//            driver2.getGamepadButton(GamepadKeys.Button.B).whenReleased(
+//                    ArmCommandFactory.createDriveModeFromFar(clawRoll, clawPitch, arm1, arm2)
+//            );
+//
+//            driver2.getGamepadButton(GamepadKeys.Button.A).whenPressed(
+//                    ArmCommandFactory.createPickupConeFarReady(clawRoll, clawPitch, arm1, arm2)
+//            );
+//            driver2.getGamepadButton(GamepadKeys.Button.A).whenReleased(
+//                    ArmCommandFactory.createDriveModeFromFar(clawRoll, clawPitch, arm1, arm2)
+//            );
+
+            driver2.getGamepadButton(GamepadKeys.Button.B).whenActive(new ScheduleCommand(new SequentialCommandGroup(
+                    new InstantCommand(()-> {
+                        farPickUpState = (farPickUpState + 1) % 2;
+                    }),
+                    new SelectCommand(
+                            new HashMap<Object, Command>() {{
+                              put(1, new ScheduleCommand(ArmCommandFactory.createPickupConeFarReady(clawRoll, clawPitch, arm1, arm2)));
+                              put(0, new ScheduleCommand(ArmCommandFactory.createPickupConeFar(clawRoll, clawPitch, arm1, arm2)));
+                            }},
+                            ()-> farPickUpState
+                    )
+            )));
 
             //
             // score select

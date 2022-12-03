@@ -141,8 +141,22 @@ public class ArmCommandFactory {
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
-                                new SetArmAngleCommand(arm1, 55),
-                                new SetArmAngleCommand(arm2, 20)
+                                new SetArmAngleCommand(arm1, 50),
+                                new SetArmAngleCommand(arm2, 27.5)
+                        )
+                )
+        );
+    }
+
+    public static Command createPickupConeFarReady(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new InstantCommand(()-> clawRoll.Upright()),
+                new InstantCommand(()-> clawPitch.setAngle(10)),
+                new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new ParallelCommandGroup(
+                                new SetArmAngleCommand(arm1, 30),
+                                new SetArmAngleCommand(arm2, 65)
                         )
                 )
         );
