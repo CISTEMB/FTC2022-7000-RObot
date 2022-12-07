@@ -69,12 +69,12 @@ public class ArmCommandFactory {
     public static Command createScoreGroundJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(() -> clawRoll.Upright()),
-                new InstantCommand(() -> clawPitch.setAngle(0)),
+                new InstantCommand(() -> clawPitch.setAngle(5)),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
-                                new SetArmAngleCommand(arm1, 0),
-                                new SetArmAngleCommand(arm2, 112)
+                                new SetArmAngleCommand(arm1, 10),
+                                new SetArmAngleCommand(arm2, 95)
                         )
                 )
         );
@@ -83,8 +83,8 @@ public class ArmCommandFactory {
     public static Command createScoreLowJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new SetArmAngleCommand(arm1, 50),
-                new SetArmAngleCommand(arm2, 120),
+                new SetArmAngleCommand(arm1, 40),
+                new SetArmAngleCommand(arm2, 125),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new InstantCommand(()-> clawPitch.setAngle(70))
@@ -95,11 +95,11 @@ public class ArmCommandFactory {
     public static Command createScoreMediumJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new SetArmAngleCommand(arm1, 95),
+                new SetArmAngleCommand(arm1, 90),
                 new SequentialCommandGroup(
                         new WaitCommand(300),
-                        new SetArmAngleCommand(arm2, 85),
-                        new InstantCommand(()-> clawPitch.setAngle(660), clawPitch)
+                        new SetArmAngleCommand(arm2, 100),
+                        new InstantCommand(()-> clawPitch.setAngle(95))
                 )
         );
     }
@@ -114,7 +114,7 @@ public class ArmCommandFactory {
                 ),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
-                        new InstantCommand(()-> clawPitch.setAngle(60))
+                        new InstantCommand(()-> clawPitch.setAngle(90))
                 )
         );
     }
@@ -185,8 +185,8 @@ public class ArmCommandFactory {
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
-                                new SetArmAngleCommand(arm1, 0),
-                                new SetArmAngleCommand(arm2, 110)
+                                new SetArmAngleCommand(arm1, 15),
+                                new SetArmAngleCommand(arm2, 85)
                         )
                 )
         );
@@ -199,8 +199,8 @@ public class ArmCommandFactory {
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
-                                new SetArmAngleCommand(arm1, 0),
-                                new SetArmAngleCommand(arm2, 115)
+                                new SetArmAngleCommand(arm1, 15),
+                                new SetArmAngleCommand(arm2, 90)
                         )
                 )
         );
@@ -213,8 +213,8 @@ public class ArmCommandFactory {
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
-                                new SetArmAngleCommand(arm1, 0),
-                                new SetArmAngleCommand(arm2, 125)
+                                new SetArmAngleCommand(arm1, 15),
+                                new SetArmAngleCommand(arm2, 95)
                         )
                 )
         );
@@ -227,8 +227,8 @@ public class ArmCommandFactory {
                 new SequentialCommandGroup(
                         new WaitCommand(100),
                         new ParallelCommandGroup(
-                                new SetArmAngleCommand(arm1, 0),
-                                new SetArmAngleCommand(arm2, 135)
+                                new SetArmAngleCommand(arm1, 20),
+                                new SetArmAngleCommand(arm2, 95)
                         )
                 )
         );
