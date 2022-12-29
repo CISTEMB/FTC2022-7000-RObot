@@ -134,15 +134,11 @@ public class AutoV2opMode extends CommandOpMode {
                 .build();
 
         Trajectory parkLeftTraj = drive.trajectoryBuilder(pushConeTraj.end())
-                .strafeLeft(18)
+                .strafeLeft(23)
                 .build();
 
         Trajectory parkRightTraj = drive.trajectoryBuilder(pushConeTraj.end())
-                .strafeRight(18)
-                .build();
-
-        Trajectory goBackTraj = drive.trajectoryBuilder(pushConeTraj.end())
-                .back(6)
+                .strafeRight(23)
                 .build();
 
         WaitForVisionCommand waitForVisionCommand = new WaitForVisionCommand(pl);
@@ -156,18 +152,19 @@ public class AutoV2opMode extends CommandOpMode {
                 new ParallelCommandGroup(
                         new TrajectoryFollowerCommand(drive, pushConeTraj),
                         new SequentialCommandGroup(
-                                new WaitUntilCommand(()->drive.getPoseEstimate().getY() > 12),
-                                new ScheduleCommand(ArmCommandFactory.createScoreMidBackJunction(clawRoll, clawPitch, arm1, arm2))
+                                new WaitUntilCommand(()->drive.getPoseEstimate().getY() > 12)
                         )
                 ),
                 new TurnCommand(drive, Math.toRadians(-31.0)),
 //                new InstantCommand(()->telemetry.addData("autoState", "turnDone"))
 //                new InstantCommand(()->telemetry.addData("autoState", "score")),
+                new ScheduleCommand(ArmCommandFactory.createScoreMidBackJunction(clawRoll, clawPitch, arm1, arm2)),
                 new WaitUntilCommand(()-> arm2.getAngle() > 90 && arm1.getAngle() > 169),
                 new WaitCommand(1000),
                 new InstantCommand(()->claw.Release()),
                 new WaitCommand(1000),
                 new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2)),
+                new WaitCommand(1000),
 
 
                 //To-do: Score cones from the cone stack during autonomous
@@ -182,8 +179,8 @@ public class AutoV2opMode extends CommandOpMode {
                             VisionPipeline.MarkerPlacement.UNKNOWN, new PrintCommand("Location unknown")
                     ),
                     () -> waitForVisionCommand.getPlacement()
-                )
-            //new TrajectoryFollowerCommand(drive,goBackTraj)
+                ),
+            new InstantCommand(() -> new TrajectoryFollowerCommand(drive, drive.trajectoryBuilder(drive.getPoseEstimate()).back(12).build()).schedule())
         ));
     }
 
