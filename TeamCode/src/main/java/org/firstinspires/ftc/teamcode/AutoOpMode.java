@@ -60,8 +60,8 @@ public class AutoOpMode extends CommandOpMode {
         clawPitch = new ClawPitch(hardwareMap);
         clawRoll = new ClawRoll(hardwareMap);
         ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2).schedule();
-
         claw.Grab();
+
         //clawPitch.setAngle(0);
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.

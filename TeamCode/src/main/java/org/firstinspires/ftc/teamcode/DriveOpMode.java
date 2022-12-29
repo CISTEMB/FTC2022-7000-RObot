@@ -73,7 +73,7 @@ public class DriveOpMode extends CommandOpMode {
                 .toggleWhenPressed(new GrabConeCommand(claw));
 
             driver.getGamepadButton(GamepadKeys.Button.B)
-                .whileHeld(new InstantCommand(()-> clawRoll.UpsideDown(), clawRoll))
+                .whileHeld(new InstantCommand(()-> clawRoll.UpsideDownHB(), clawRoll))
                 .whenReleased(new InstantCommand(() -> clawRoll.Upright(), clawRoll));
 
         }

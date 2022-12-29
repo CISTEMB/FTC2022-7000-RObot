@@ -66,6 +66,24 @@ public class ArmCommandFactory {
         );
     }
 
+    public static Command createDriveModeFromMidRear(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new SequentialCommandGroup(
+//                        new WaitUntilCommand(() -> arm1.getAngle() < 115),
+                        new InstantCommand(()-> clawRoll.Upright())
+                ),
+                new SetArmAngleCommand(arm1, 1),
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> arm1.getAngle() < 155),
+                        new SetArmAngleCommand(arm2, 160)
+                ),
+                new SequentialCommandGroup(
+                        new WaitCommand(100),
+                        new InstantCommand(()-> clawPitch.setAngle(0))
+                )
+        );
+    }
+
     public static Command createScoreGroundJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(() -> clawRoll.Upright()),
@@ -128,8 +146,24 @@ public class ArmCommandFactory {
                 ),
                 new SequentialCommandGroup(
                         new WaitUntilCommand(()-> arm1.getAngle() > 145),
-                        new InstantCommand(()-> clawRoll.UpsideDown()),
+                        new InstantCommand(()-> clawRoll.UpsideDownHB()),
                         new InstantCommand(()-> clawPitch.setAngle(85))
+
+                )
+        );
+    }
+
+    public static Command createScoreMidBackJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
+        return new ParallelCommandGroup(
+                new SetArmAngleCommand(arm2, 90),
+                new SequentialCommandGroup(
+                        new WaitCommand(50),
+                        new SetArmAngleCommand(arm1, 169)
+                ),
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(()-> arm1.getAngle() > 45),
+                        new InstantCommand(()-> clawRoll.UpsideDown()),
+                        new InstantCommand(()-> clawPitch.setAngle(0))
 
                 )
         );

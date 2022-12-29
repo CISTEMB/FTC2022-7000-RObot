@@ -9,7 +9,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class ClawRoll extends SubsystemBase {
 
     public static double UPRIGHT_POSITION = 0.87;
-    public static double UPSIDE_DOWN = 0.25;
+    public static double UPSIDE_DOWN_HB = 0.25;
+    public static double UPSIDE_DOWN = 0.15;
 
     private Servo servo;
 
@@ -24,6 +25,10 @@ public class ClawRoll extends SubsystemBase {
 
     public void UpsideDown() {
         servo.setPosition(UPSIDE_DOWN);
+    }
+
+    public void UpsideDownHB() {
+        servo.setPosition(UPSIDE_DOWN_HB);
     }
 }
 
