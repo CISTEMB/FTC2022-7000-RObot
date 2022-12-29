@@ -7,18 +7,24 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.MapSelectCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
 import com.arcrobotics.ftclib.command.ParallelRaceGroup;
+import com.arcrobotics.ftclib.command.PrintCommand;
 import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
+import com.google.common.collect.ImmutableMap;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.commands.ArmCommandFactory;
+import org.firstinspires.ftc.teamcode.commands.DriveForwardCommand;
+import org.firstinspires.ftc.teamcode.commands.DriveStrafeCommand;
+import org.firstinspires.ftc.teamcode.commands.DriveWithGamepadCommand;
 import org.firstinspires.ftc.teamcode.commands.WaitForVisionCommand;
 import org.firstinspires.ftc.teamcode.commands.roadrunner.TrajectoryFollowerCommand;
 import org.firstinspires.ftc.teamcode.commands.roadrunner.TurnCommand;
@@ -127,10 +133,22 @@ public class AutoV2opMode extends CommandOpMode {
                 .forward(54)
                 .build();
 
+        Trajectory parkLeftTraj = drive.trajectoryBuilder(pushConeTraj.end())
+                .strafeLeft(18)
+                .build();
+
+        Trajectory parkRightTraj = drive.trajectoryBuilder(pushConeTraj.end())
+                .strafeRight(18)
+                .build();
+
+        Trajectory goBackTraj = drive.trajectoryBuilder(pushConeTraj.end())
+                .back(6)
+                .build();
+
         WaitForVisionCommand waitForVisionCommand = new WaitForVisionCommand(pl);
         schedule(new SequentialCommandGroup(
-                waitForVisionCommand.withTimeout(5000),
                 new WaitUntilCommand(()->isStarted()),
+                waitForVisionCommand.withTimeout(5000),
                 new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)),
 //                new InstantCommand(()->telemetry.addData("autoState", "strafe")),
                 new TrajectoryFollowerCommand(drive, strafeRight),
@@ -149,9 +167,24 @@ public class AutoV2opMode extends CommandOpMode {
                 new WaitCommand(1000),
                 new InstantCommand(()->claw.Release()),
                 new WaitCommand(1000),
-                new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2))
-        ));
+                new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2)),
 
+
+                //To-do: Score cones from the cone stack during autonomous
+
+                //Park in the correct space
+                new TurnCommand(drive, Math.toRadians(31.0)),
+                new MapSelectCommand<>(
+                    ImmutableMap.of(
+                            VisionPipeline.MarkerPlacement.LOCATION_1, new TrajectoryFollowerCommand(drive,parkLeftTraj),
+                            VisionPipeline.MarkerPlacement.LOCATION_2, new PrintCommand("Location 2"),
+                            VisionPipeline.MarkerPlacement.LOCATION_3, new TrajectoryFollowerCommand(drive,parkRightTraj),
+                            VisionPipeline.MarkerPlacement.UNKNOWN, new PrintCommand("Location unknown")
+                    ),
+                    () -> waitForVisionCommand.getPlacement()
+                )
+            //new TrajectoryFollowerCommand(drive,goBackTraj)
+        ));
     }
 
     @Override
