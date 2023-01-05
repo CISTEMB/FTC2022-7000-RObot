@@ -3,14 +3,11 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.MapSelectCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
-import com.arcrobotics.ftclib.command.ParallelRaceGroup;
 import com.arcrobotics.ftclib.command.PrintCommand;
 import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -22,9 +19,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.commands.ArmCommandFactory;
-import org.firstinspires.ftc.teamcode.commands.DriveForwardCommand;
-import org.firstinspires.ftc.teamcode.commands.DriveStrafeCommand;
-import org.firstinspires.ftc.teamcode.commands.DriveWithGamepadCommand;
 import org.firstinspires.ftc.teamcode.commands.WaitForVisionCommand;
 import org.firstinspires.ftc.teamcode.commands.roadrunner.TrajectoryFollowerCommand;
 import org.firstinspires.ftc.teamcode.commands.roadrunner.TurnCommand;
@@ -46,7 +40,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
  * NOTE: this has been refactored to use FTCLib's command-based
  */
 @Autonomous(group = "drive", name = "Auto V2 Right")
-public class AutoV2opMode extends CommandOpMode {
+public class AutoV2RightOpMode extends CommandOpMode {
 
     private MecanumDriveSubsystem drive;
     private TrajectoryFollowerCommand splineFollower;
@@ -180,7 +174,7 @@ public class AutoV2opMode extends CommandOpMode {
                     ),
                     () -> waitForVisionCommand.getPlacement()
                 ),
-            new InstantCommand(() -> new TrajectoryFollowerCommand(drive, drive.trajectoryBuilder(drive.getPoseEstimate()).back(12).build()).schedule())
+            new InstantCommand(() -> new TrajectoryFollowerCommand(drive, drive.trajectoryBuilder(drive.getPoseEstimate()).back(20).build()).schedule())
         ));
     }
 
