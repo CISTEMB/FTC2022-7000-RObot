@@ -163,7 +163,7 @@ public class ArmCommandFactory {
                 new SequentialCommandGroup(
                         new WaitUntilCommand(()-> arm1.getAngle() > 45),
                         new InstantCommand(()-> clawRoll.UpsideDown()),
-                        new InstantCommand(()-> clawPitch.setAngle(0))
+                        new InstantCommand(()-> clawPitch.setAngle(15))
 
                 )
         );

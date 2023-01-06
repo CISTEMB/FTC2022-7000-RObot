@@ -174,7 +174,7 @@ public class AutoV2RightOpMode extends CommandOpMode {
                     ),
                     () -> waitForVisionCommand.getPlacement()
                 ),
-            new InstantCommand(() -> new TrajectoryFollowerCommand(drive, drive.trajectoryBuilder(drive.getPoseEstimate()).back(20).build()).schedule())
+            new InstantCommand(() -> new TrajectoryFollowerCommand(drive, drive.trajectoryBuilder(drive.getPoseEstimate()).back(12).build()).schedule())
         ));
     }
 
