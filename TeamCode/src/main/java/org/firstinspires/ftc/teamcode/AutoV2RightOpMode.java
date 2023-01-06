@@ -58,7 +58,7 @@ public class AutoV2RightOpMode extends CommandOpMode {
         arm1 = new Arm(hardwareMap, telemetry, "Arm1", "arm1Pot", "fEncoder", 16,1, 180, DcMotorSimple.Direction.REVERSE, Arm.ARM1_PID, 1, -1);
         arm2 = new Arm(hardwareMap, telemetry, "Arm2","arm2Pot", "lEncoder", 90, 1, 155, DcMotorSimple.Direction.FORWARD, Arm.ARM2_PID, 0.75, -0.75);
         claw = new Claw(hardwareMap);
-        clawPitch = new ClawPitch(hardwareMap);
+        clawPitch = new ClawPitch(hardwareMap, telemetry);
         clawRoll = new ClawRoll(hardwareMap);
 //        ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2).schedule();
         claw.Grab();

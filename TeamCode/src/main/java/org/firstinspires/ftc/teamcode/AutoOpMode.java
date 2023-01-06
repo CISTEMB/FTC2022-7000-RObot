@@ -4,27 +4,18 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.MapSelectCommand;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.PrintCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.google.common.collect.ImmutableMap;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.commands.ArmCommandFactory;
 import org.firstinspires.ftc.teamcode.commands.DriveForwardCommand;
 import org.firstinspires.ftc.teamcode.commands.DriveStrafeCommand;
-import org.firstinspires.ftc.teamcode.commands.DriveWithGamepadCommand;
-import org.firstinspires.ftc.teamcode.commands.GrabConeCommand;
-import org.firstinspires.ftc.teamcode.commands.SetArmAngleCommand;
 import org.firstinspires.ftc.teamcode.commands.WaitForVisionCommand;
 import org.firstinspires.ftc.teamcode.subsystems.Arm;
 import org.firstinspires.ftc.teamcode.subsystems.Claw;
@@ -37,7 +28,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@Autonomous(name = "AUTO")
+@Autonomous(name = "OLD AUTO")
 
 public class AutoOpMode extends CommandOpMode {
 
@@ -57,7 +48,7 @@ public class AutoOpMode extends CommandOpMode {
         arm1 = new Arm(hardwareMap, telemetry, "Arm1", "arm1Pot", "fEncoder", 16,1, 180, DcMotorSimple.Direction.REVERSE, Arm.ARM1_PID, 1, -1);
         arm2 = new Arm(hardwareMap, telemetry, "Arm2","arm2Pot", "lEncoder", 90, 1, 155, DcMotorSimple.Direction.FORWARD, Arm.ARM2_PID, 0.75, -0.75);
         claw = new Claw(hardwareMap);
-        clawPitch = new ClawPitch(hardwareMap);
+        clawPitch = new ClawPitch(hardwareMap, telemetry);
         clawRoll = new ClawRoll(hardwareMap);
         ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2).schedule();
         claw.Grab();

@@ -18,7 +18,7 @@ public class ArmCommandFactory {
     public static Command createDriveModeFromFront(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new SetArmAngleCommand(arm2, 160),
+                new SetArmAngleCommand(arm2, 180),
                 new SequentialCommandGroup(
                         new WaitUntilCommand(() -> arm2.getAngle() > 145),
                         new SetArmAngleCommand(arm1, 1)
@@ -35,7 +35,7 @@ public class ArmCommandFactory {
                 new InstantCommand(()-> clawRoll.Upright()),
                 new SequentialCommandGroup(
                         new SetArmAngleCommand(arm2, 160).interruptOn(() -> arm2.getAngle() > 155),
-                        new SetArmAngleCommand(arm2, 160)
+                        new SetArmAngleCommand(arm2, 180)
                 ),
                 new SequentialCommandGroup(
                         new WaitUntilCommand(() -> arm2.getAngle() > 100),
@@ -57,7 +57,7 @@ public class ArmCommandFactory {
                 new SetArmAngleCommand(arm1, 1),
                 new SequentialCommandGroup(
                         new WaitUntilCommand(() -> arm1.getAngle() < 155),
-                        new SetArmAngleCommand(arm2, 160)
+                        new SetArmAngleCommand(arm2, 180)
                 ),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
@@ -75,7 +75,7 @@ public class ArmCommandFactory {
                 new SetArmAngleCommand(arm1, 1),
                 new SequentialCommandGroup(
                         new WaitUntilCommand(() -> arm1.getAngle() < 155),
-                        new SetArmAngleCommand(arm2, 160)
+                        new SetArmAngleCommand(arm2, 180)
                 ),
                 new SequentialCommandGroup(
                         new WaitCommand(100),
@@ -113,11 +113,11 @@ public class ArmCommandFactory {
     public static Command createScoreMediumJunction(ClawRoll clawRoll, ClawPitch clawPitch, Arm arm1, Arm arm2) {
         return new ParallelCommandGroup(
                 new InstantCommand(()-> clawRoll.Upright()),
-                new SetArmAngleCommand(arm1, 90),
+                new SetArmAngleCommand(arm1, 85),
                 new SequentialCommandGroup(
                         new WaitCommand(300),
-                        new SetArmAngleCommand(arm2, 100),
-                        new InstantCommand(()-> clawPitch.setAngle(95))
+                        new InstantCommand(()-> clawPitch.setAngle(90)),
+                        new SetArmAngleCommand(arm2, 100)
                 )
         );
     }
