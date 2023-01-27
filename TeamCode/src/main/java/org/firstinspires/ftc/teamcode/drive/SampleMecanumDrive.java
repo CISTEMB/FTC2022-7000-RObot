@@ -188,6 +188,10 @@ public class SampleMecanumDrive extends MecanumDrive {
         );
     }
 
+    public void breakFollowing() {
+        trajectorySequenceRunner.breakFollowing();
+    }
+
     public void followTrajectory(Trajectory trajectory) {
         followTrajectoryAsync(trajectory);
         waitForIdle();

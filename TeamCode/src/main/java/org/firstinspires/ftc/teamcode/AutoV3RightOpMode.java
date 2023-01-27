@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.MapSelectCommand;
@@ -24,13 +28,16 @@ import org.firstinspires.ftc.teamcode.commands.ArmCommandFactory;
 import org.firstinspires.ftc.teamcode.commands.WaitForVisionCommand;
 import org.firstinspires.ftc.teamcode.commands.roadrunner.TrajectoryFollowerCommand;
 import org.firstinspires.ftc.teamcode.commands.roadrunner.TurnCommand;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Arm;
 import org.firstinspires.ftc.teamcode.subsystems.Claw;
 import org.firstinspires.ftc.teamcode.subsystems.ClawPitch;
 import org.firstinspires.ftc.teamcode.subsystems.ClawRoll;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.TapeDetector;
 import org.firstinspires.ftc.teamcode.subsystems.VisionPipeline;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -52,9 +59,7 @@ public class AutoV3RightOpMode extends CommandOpMode {
     private Claw claw;
     private ClawPitch clawPitch;
     private ClawRoll clawRoll;
-    private NormalizedColorSensor colorSensor;
-    private final float colorSensorGain = 2;
-    private final float[] hsvValues = new float[3];
+    private TapeDetector tapeDetector;
 
     @Override
     public void initialize() {
@@ -67,8 +72,7 @@ public class AutoV3RightOpMode extends CommandOpMode {
         clawRoll = new ClawRoll(hardwareMap);
 //        ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2).schedule();
         claw.Grab();
-        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
-        colorSensor.setGain(colorSensorGain);
+        tapeDetector = new TapeDetector(hardwareMap, telemetry);
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
          * In this sample, we're using a webcam. Note that you will need to
@@ -141,15 +145,32 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 .strafeRight(23)
                 .build();
 
+        Trajectory toTape = drive.trajectoryBuilder(startingPosition).forward(
+            5,
+            SampleMecanumDrive.getVelocityConstraint(2, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+            SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL/2.0)
+        ).build();
+
+        Pose2d tapePose = new Pose2d(0, 5, Math.toRadians(90));
+        Trajectory fromTape = drive.trajectoryBuilder(tapePose)
+                .forward(4)
+                .build();
+
         WaitForVisionCommand waitForVisionCommand = new WaitForVisionCommand(pl);
         schedule(new SequentialCommandGroup(
                 new WaitUntilCommand(()->isStarted()),
                 waitForVisionCommand.withTimeout(5000),
                 new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)),
-                new RunCommand(()->drive.drive(-0.2,0,0)).interruptOn(
-                        ()->colorSensor.getNormalizedColors().blue>0.3
-                ),
-                new InstantCommand(()->drive.stop())
+                new TrajectoryFollowerCommand(drive, toTape).interruptOn(()->{
+                    return tapeDetector.getHue() > 200 && tapeDetector.getSaturation() > 0.5 & tapeDetector.getValue() > 0.1;
+                }),
+                new InstantCommand(()->drive.stop()),
+                new WaitCommand(1000),
+                new InstantCommand(()->drive.setPoseEstimate(tapePose)),
+                new TrajectoryFollowerCommand(drive, fromTape),
+                new RunCommand(()->drive.updatePoseEstimate())
+
+//                new TrajectoryFollowerCommand(drive, strafeRight),
 //                new InstantCommand(()->telemetry.addData("autoState", "strafe")),
 //                new TrajectoryFollowerCommand(drive, strafeRight),
 ////                new InstantCommand(()->telemetry.addData("autoState", "push")),
@@ -191,6 +212,9 @@ public class AutoV3RightOpMode extends CommandOpMode {
     @Override
     public void run() {
         super.run();
+        telemetry.addData("Drive Pose X", drive.getPoseEstimate().getX());
+        telemetry.addData("Drive Pose Y", drive.getPoseEstimate().getY());
+        telemetry.addData("Drive Pose Heading", drive.getPoseEstimate().getHeading());
         telemetry.update();
     }
 
