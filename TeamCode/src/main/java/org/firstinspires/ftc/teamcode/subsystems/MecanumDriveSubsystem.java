@@ -110,6 +110,11 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         drive(0, 0, 0);
     }
 
+    public void breakFollowing() {
+        drive.breakFollowing();
+    }
+
+
     public Pose2d getPoseVelocity() {
         return drive.getPoseVelocity();
     }

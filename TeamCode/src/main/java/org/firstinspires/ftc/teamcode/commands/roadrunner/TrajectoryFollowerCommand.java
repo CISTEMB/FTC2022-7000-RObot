@@ -9,6 +9,12 @@ public class TrajectoryFollowerCommand extends CommandBase {
 
     private final MecanumDriveSubsystem drive;
     private final Trajectory trajectory;
+    private boolean stop = true;
+
+    public TrajectoryFollowerCommand doNotStop() {
+        stop=false;
+        return this;
+    }
 
     public TrajectoryFollowerCommand(MecanumDriveSubsystem drive, Trajectory trajectory) {
         this.drive = drive;
@@ -29,7 +35,8 @@ public class TrajectoryFollowerCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        if (interrupted) {
+        drive.breakFollowing();
+        if (interrupted && stop) {
             drive.stop();
         }
     }
@@ -38,5 +45,4 @@ public class TrajectoryFollowerCommand extends CommandBase {
     public boolean isFinished() {
         return Thread.currentThread().isInterrupted() || !drive.isBusy();
     }
-
 }

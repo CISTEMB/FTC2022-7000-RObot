@@ -36,6 +36,7 @@ import org.firstinspires.ftc.teamcode.subsystems.ClawPitch;
 import org.firstinspires.ftc.teamcode.subsystems.ClawRoll;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TapeDetector;
+import org.firstinspires.ftc.teamcode.subsystems.TapeDetector2;
 import org.firstinspires.ftc.teamcode.subsystems.VisionPipeline;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -59,7 +60,7 @@ public class AutoV3RightOpMode extends CommandOpMode {
     private Claw claw;
     private ClawPitch clawPitch;
     private ClawRoll clawRoll;
-    private TapeDetector tapeDetector;
+    private TapeDetector2 tapeDetector;
 
     @Override
     public void initialize() {
@@ -72,7 +73,7 @@ public class AutoV3RightOpMode extends CommandOpMode {
         clawRoll = new ClawRoll(hardwareMap);
 //        ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2).schedule();
         claw.Grab();
-        tapeDetector = new TapeDetector(hardwareMap, telemetry);
+        tapeDetector = new TapeDetector2(hardwareMap, telemetry);
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
          * In this sample, we're using a webcam. Note that you will need to
@@ -146,27 +147,31 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 .build();
 
         Trajectory toTape = drive.trajectoryBuilder(startingPosition).forward(
-            5,
-            SampleMecanumDrive.getVelocityConstraint(2, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-            SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL/2.0)
+            10,
+            SampleMecanumDrive.getVelocityConstraint(8, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+            SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
         ).build();
 
         Pose2d tapePose = new Pose2d(0, 5, Math.toRadians(90));
         Trajectory fromTape = drive.trajectoryBuilder(tapePose)
-                .forward(4)
+                .forward(2)
                 .build();
 
         WaitForVisionCommand waitForVisionCommand = new WaitForVisionCommand(pl);
         schedule(new SequentialCommandGroup(
                 new WaitUntilCommand(()->isStarted()),
-                waitForVisionCommand.withTimeout(5000),
-                new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)),
+                //waitForVisionCommand.withTimeout(5000),
+//                new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)),
+//
+//                // Drive up to the piece of tape
                 new TrajectoryFollowerCommand(drive, toTape).interruptOn(()->{
-                    return tapeDetector.getHue() > 200 && tapeDetector.getSaturation() > 0.5 & tapeDetector.getValue() > 0.1;
+                    return tapeDetector.tapeDetected();
                 }),
-                new InstantCommand(()->drive.stop()),
-                new WaitCommand(1000),
+                // Once passed reset out current pose
                 new InstantCommand(()->drive.setPoseEstimate(tapePose)),
+                new RunCommand(()->drive.updatePoseEstimate()).withTimeout(1000),
+
+                // Switch to a different trajectory
                 new TrajectoryFollowerCommand(drive, fromTape),
                 new RunCommand(()->drive.updatePoseEstimate())
 
