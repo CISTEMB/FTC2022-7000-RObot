@@ -1,33 +1,20 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.MapSelectCommand;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.PrintCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
-import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
-import com.google.common.collect.ImmutableMap;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.commands.ArmCommandFactory;
 import org.firstinspires.ftc.teamcode.commands.WaitForVisionCommand;
 import org.firstinspires.ftc.teamcode.commands.roadrunner.TrajectoryFollowerCommand;
-import org.firstinspires.ftc.teamcode.commands.roadrunner.TurnCommand;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Arm;
@@ -38,7 +25,6 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TapeDetector;
 import org.firstinspires.ftc.teamcode.subsystems.TapeDetector2;
 import org.firstinspires.ftc.teamcode.subsystems.VisionPipeline;
-import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -49,8 +35,8 @@ import org.openftc.easyopencv.OpenCvWebcam;
  *
  * NOTE: this has been refactored to use FTCLib's command-based
  */
-@Autonomous(group = "drive", name = "Auto V3 Right")
-public class AutoV3RightOpMode extends CommandOpMode {
+@Autonomous(group = "drive", name = "Auto V3.1 Right")
+public class AutoV3dot1RightOpMode extends CommandOpMode {
 
     private MecanumDriveSubsystem drive;
     private TrajectoryFollowerCommand splineFollower;
@@ -60,7 +46,7 @@ public class AutoV3RightOpMode extends CommandOpMode {
     private Claw claw;
     private ClawPitch clawPitch;
     private ClawRoll clawRoll;
-    private TapeDetector2 tapeDetector;
+    private TapeDetector tapeDetector;
 
     @Override
     public void initialize() {
@@ -73,7 +59,7 @@ public class AutoV3RightOpMode extends CommandOpMode {
         clawRoll = new ClawRoll(hardwareMap);
 //        ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2).schedule();
         claw.Grab();
-        tapeDetector = new TapeDetector2(hardwareMap, telemetry);
+        tapeDetector = new TapeDetector(hardwareMap, telemetry);
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
          * In this sample, we're using a webcam. Note that you will need to
@@ -148,10 +134,10 @@ public class AutoV3RightOpMode extends CommandOpMode {
 
         Trajectory toTape = drive.trajectoryBuilder(startingPosition).forward(
             10,
-            // We want the robot to drive slow when going over the tape so we can
-            // properly detect the tape
-            SampleMecanumDrive.getVelocityConstraint(6, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-            SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
+                // We want the robot to drive slow when going over the tape so we can
+                // properly detect the tape
+                SampleMecanumDrive.getVelocityConstraint(6, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
         ).build();
 
         Pose2d tapePose = new Pose2d(0, 5, Math.toRadians(90));

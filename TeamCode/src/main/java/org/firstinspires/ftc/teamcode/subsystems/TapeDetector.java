@@ -41,6 +41,10 @@ public class TapeDetector extends SubsystemBase {
         return colorSensor.getLightDetected();
     }
 
+    public boolean tapeDetected() {
+        return getLightDetected() >= 1.0;
+    }
+
 
     @Override
     public void periodic() {
