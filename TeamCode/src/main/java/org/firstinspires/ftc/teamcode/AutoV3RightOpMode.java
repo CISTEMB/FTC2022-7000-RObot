@@ -5,14 +5,18 @@ import android.graphics.Color;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.FunctionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.MapSelectCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.PrintCommand;
+import com.arcrobotics.ftclib.command.ProxyScheduleCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -62,9 +66,11 @@ public class AutoV3RightOpMode extends CommandOpMode {
     private ClawRoll clawRoll;
     private TapeDetector2 tapeDetector;
 
+    private Trajectory pushConeTraj;
+
     @Override
     public void initialize() {
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        // telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         drive = new MecanumDriveSubsystem(new SampleMecanumDrive(hardwareMap), false);
         arm1 = new Arm(hardwareMap, telemetry, "Arm1", "arm1Pot", "fEncoder", 16,1, 180, DcMotorSimple.Direction.REVERSE, Arm.ARM1_PID, 1, -1);
         arm2 = new Arm(hardwareMap, telemetry, "Arm2","arm2Pot", "lEncoder", 90, 1, 155, DcMotorSimple.Direction.FORWARD, Arm.ARM2_PID, 0.75, -0.75);
@@ -134,37 +140,45 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 .strafeRight(4.125)
                 .build();
 
-        Trajectory pushConeTraj = drive.trajectoryBuilder(strafeRight.end())
-                .forward(54)
-                .build();
+        Trajectory toTape = drive.trajectoryBuilder(strafeRight.end())
+            // Drive normally to the tapes
+            .forward(30)
+            // Drive slowly up to the tape
+            .forward(
+                6,
+                // We want the robot to drive slow when going over the tape so we can
+                // properly detect the tape
+                SampleMecanumDrive.getVelocityConstraint(6, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
+        ).build();
 
-        Trajectory parkLeftTraj = drive.trajectoryBuilder(pushConeTraj.end())
+        final Pose2d tapePose = new Pose2d(0, 0, Math.toRadians(90));
+        final Pose2d scorePose = new Pose2d(0, 19.625+7, Math.toRadians(90));
+
+        Trajectory parkLeftTraj = drive.trajectoryBuilder(scorePose)
                 .strafeLeft(23)
                 .build();
 
-        Trajectory parkRightTraj = drive.trajectoryBuilder(pushConeTraj.end())
+        Trajectory parkRightTraj = drive.trajectoryBuilder(scorePose)
                 .strafeRight(23)
-                .build();
-
-        Trajectory toTape = drive.trajectoryBuilder(startingPosition).forward(
-            10,
-            // We want the robot to drive slow when going over the tape so we can
-            // properly detect the tape
-            SampleMecanumDrive.getVelocityConstraint(6, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-            SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
-        ).build();
-
-        Pose2d tapePose = new Pose2d(0, 5, Math.toRadians(90));
-        Trajectory fromTape = drive.trajectoryBuilder(tapePose)
-                .forward(2)
                 .build();
 
         WaitForVisionCommand waitForVisionCommand = new WaitForVisionCommand(pl);
         schedule(new SequentialCommandGroup(
+                // Wait for the match to start
                 new WaitUntilCommand(()->isStarted()),
+
+                // Wait up to 5 seconds to detect the signal, most of the time
+                // this should be very quick
+                // TODO add back in
                 //waitForVisionCommand.withTimeout(5000),
-//                new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)),
-//
+
+                // Put the Arm into drive mode
+                new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)),
+
+                // Strafe right to align to put the robot into the center of the tile
+                new TrajectoryFollowerCommand(drive, strafeRight),
+
                 // Drive up to the piece of tape
                 new TrajectoryFollowerCommand(drive, toTape).interruptOn(()->{
                     return tapeDetector.tapeDetected();
@@ -176,48 +190,55 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 // Stop for a moment to let the robot settle, and update the robot's pose.
                 new RunCommand(()->drive.updatePoseEstimate()).withTimeout(1000),
 
-                // Switch to a different trajectory, and continue on!
-                new TrajectoryFollowerCommand(drive, fromTape),
+                // Push the cone out of the way
+                // Using this one, caused the robot to move back and forth
+                // new TrajectoryFollowerCommand(drive, pushConeTraj),
+                new InstantCommand(() -> {
+                    // Construct a trajectory based on the robots current location
+                    pushConeTraj = drive.trajectoryBuilder(drive.getPoseEstimate())
+                            .splineTo(scorePose.vec(), scorePose.getHeading())
+                            .build();
+                }),
 
-                // For debugging, lets just update the robot's pose
-                new RunCommand(()->drive.updatePoseEstimate())
+                // Push the cone!
+                new TrajectoryFollowerCommand(drive, ()->pushConeTraj),
 
-//                new TrajectoryFollowerCommand(drive, strafeRight),
-//                new InstantCommand(()->telemetry.addData("autoState", "strafe")),
-//                new TrajectoryFollowerCommand(drive, strafeRight),
-////                new InstantCommand(()->telemetry.addData("autoState", "push")),
-//                new ParallelCommandGroup(
-//                        new TrajectoryFollowerCommand(drive, pushConeTraj),
-//                        new SequentialCommandGroup(
-//                                new WaitUntilCommand(()->drive.getPoseEstimate().getY() > 12)
-//                        )
-//                ),
-//                new TurnCommand(drive, Math.toRadians(-31.0)),
-////                new InstantCommand(()->telemetry.addData("autoState", "turnDone"))
-////                new InstantCommand(()->telemetry.addData("autoState", "score")),
-//                new ScheduleCommand(ArmCommandFactory.createScoreMidBackJunction(clawRoll, clawPitch, arm1, arm2)),
-//                new WaitUntilCommand(()-> arm2.getAngle() > 90 && arm1.getAngle() > 169),
-//                new WaitCommand(1000),
-//                new InstantCommand(()->claw.Release()),
-//                new WaitCommand(1000),
-//                new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2)),
-//                new WaitCommand(1000),
-//
-//
-//                //To-do: Score cones from the cone stack during autonomous
-//
-//                //Park in the correct space
-//                new TurnCommand(drive, Math.toRadians(31.0)),
-//                new MapSelectCommand<>(
-//                    ImmutableMap.of(
-//                            VisionPipeline.MarkerPlacement.LOCATION_1, new TrajectoryFollowerCommand(drive,parkLeftTraj),
-//                            VisionPipeline.MarkerPlacement.LOCATION_2, new PrintCommand("Location 2"),
-//                            VisionPipeline.MarkerPlacement.LOCATION_3, new TrajectoryFollowerCommand(drive,parkRightTraj),
-//                            VisionPipeline.MarkerPlacement.UNKNOWN, new PrintCommand("Location unknown")
-//                    ),
-//                    () -> waitForVisionCommand.getPlacement()
-//                ),
-//            new InstantCommand(() -> new TrajectoryFollowerCommand(drive, drive.trajectoryBuilder(drive.getPoseEstimate()).back(12).build()).schedule())
+                // Turn to face the junction
+                new TurnCommand(drive, Math.toRadians(-31.0)),
+
+                // Move arm to the junction
+                new ScheduleCommand(ArmCommandFactory.createScoreMidBackJunction(clawRoll, clawPitch, arm1, arm2)),
+
+                // Wait for the arm to move
+                new WaitUntilCommand(()-> arm2.getAngle() > 90 && arm1.getAngle() > 169),
+                new WaitCommand(1000),
+
+                // Release the code
+                new InstantCommand(()->claw.Release()),
+                new WaitCommand(1000),
+
+                // Put arm back
+                new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2)),
+                new WaitCommand(1000),
+
+
+                //To-do: Score cones from the cone stack during autonomous
+
+                //Park in the correct space
+                new TurnCommand(drive, Math.toRadians(31.0)),
+                new MapSelectCommand<>(
+                    ImmutableMap.of(
+                            VisionPipeline.MarkerPlacement.LOCATION_1, new TrajectoryFollowerCommand(drive,parkLeftTraj),
+                            VisionPipeline.MarkerPlacement.LOCATION_2, new PrintCommand("Location 2"),
+                            VisionPipeline.MarkerPlacement.LOCATION_3, new TrajectoryFollowerCommand(drive,parkRightTraj),
+                            VisionPipeline.MarkerPlacement.UNKNOWN, new PrintCommand("Location unknown")
+                    ),
+                    () -> waitForVisionCommand.getPlacement()
+                ),
+            new InstantCommand(() -> new TrajectoryFollowerCommand(drive, drive.trajectoryBuilder(drive.getPoseEstimate()).back(12).build()).schedule())
+
+//            // For debugging, lets just update the robot's pose
+//            new RunCommand(()->drive.updatePoseEstimate())
         ));
     }
 

@@ -4,11 +4,12 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
+import org.firstinspires.ftc.teamcode.util.TrajectoryProvider;
 
 public class TrajectoryFollowerCommand extends CommandBase {
 
     private final MecanumDriveSubsystem drive;
-    private final Trajectory trajectory;
+    private final TrajectoryProvider trajectoryProvider;
     private boolean stop = true;
 
     public TrajectoryFollowerCommand doNotStop() {
@@ -17,15 +18,19 @@ public class TrajectoryFollowerCommand extends CommandBase {
     }
 
     public TrajectoryFollowerCommand(MecanumDriveSubsystem drive, Trajectory trajectory) {
+        this(drive, ()->trajectory);
+    }
+
+    public TrajectoryFollowerCommand(MecanumDriveSubsystem drive, TrajectoryProvider trajectoryProvider) {
         this.drive = drive;
-        this.trajectory = trajectory;
+        this.trajectoryProvider = trajectoryProvider;
 
         addRequirements(drive);
     }
 
     @Override
     public void initialize() {
-        drive.followTrajectory(trajectory);
+        drive.followTrajectory(trajectoryProvider.get());
     }
 
     @Override
