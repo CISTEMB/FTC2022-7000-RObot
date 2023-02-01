@@ -311,4 +311,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     public static TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
         return new ProfileAccelerationConstraint(maxAccel);
     }
+    public void breakFollowing() {
+        trajectorySequenceRunner.breakFollowing();
+    }
 }

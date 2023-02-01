@@ -17,6 +17,7 @@ import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.google.common.collect.ImmutableMap;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.teamcode.commands.ArmCommandFactory;
 import org.firstinspires.ftc.teamcode.commands.WaitForVisionCommand;
 import org.firstinspires.ftc.teamcode.commands.roadrunner.TrajectoryFollowerCommand;
 import org.firstinspires.ftc.teamcode.commands.roadrunner.TurnCommand;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Arm;
 import org.firstinspires.ftc.teamcode.subsystems.Claw;
@@ -52,9 +54,7 @@ public class AutoV3RightOpMode extends CommandOpMode {
     private Claw claw;
     private ClawPitch clawPitch;
     private ClawRoll clawRoll;
-    private NormalizedColorSensor colorSensor;
-    private final float colorSensorGain = 2;
-    private final float[] hsvValues = new float[3];
+    private DigitalChannel tapeDetector;
 
     @Override
     public void initialize() {
@@ -67,8 +67,8 @@ public class AutoV3RightOpMode extends CommandOpMode {
         clawRoll = new ClawRoll(hardwareMap);
 //        ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2).schedule();
         claw.Grab();
-        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
-        colorSensor.setGain(colorSensorGain);
+        tapeDetector = hardwareMap.get(DigitalChannel.class,"tape");
+        tapeDetector.setMode(DigitalChannel.Mode.INPUT);
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
          * In this sample, we're using a webcam. Note that you will need to
@@ -122,15 +122,24 @@ public class AutoV3RightOpMode extends CommandOpMode {
             }
         });
 
-        Pose2d startingPosition = new Pose2d(0, 0, Math.toRadians(90));
+        Pose2d startingPosition = new Pose2d(0, 0, Math.toRadians(0));
         drive.setPoseEstimate(startingPosition);
 
         Trajectory strafeRight = drive.trajectoryBuilder(startingPosition)
                 .strafeRight(4.125)
                 .build();
 
-        Trajectory pushConeTraj = drive.trajectoryBuilder(strafeRight.end())
-                .forward(54)
+        Trajectory toTape = drive.trajectoryBuilder(strafeRight.end())
+                .forward(20)
+                .forward(
+                        6,
+                        SampleMecanumDrive.getVelocityConstraint(6, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .build();
+        Pose2d tapePositon = new Pose2d(0,0, Math.toRadians(0));
+
+        Trajectory pushConeTraj = drive.trajectoryBuilder(tapePositon)
+                .forward(27.5)
                 .build();
 
         Trajectory parkLeftTraj = drive.trajectoryBuilder(pushConeTraj.end())
@@ -141,36 +150,29 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 .strafeRight(23)
                 .build();
 
+
         WaitForVisionCommand waitForVisionCommand = new WaitForVisionCommand(pl);
         schedule(new SequentialCommandGroup(
                 new WaitUntilCommand(()->isStarted()),
-                waitForVisionCommand.withTimeout(5000),
+                //waitForVisionCommand.withTimeout(5000),
                 new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)),
-                new RunCommand(()->drive.drive(-0.2,0,0)).interruptOn(
-                        ()->colorSensor.getNormalizedColors().blue>0.3
+                new TrajectoryFollowerCommand(drive, strafeRight),
+                new TrajectoryFollowerCommand(drive, toTape).interruptOn(
+                        ()->tapeDetector.getState()
                 ),
-                new InstantCommand(()->drive.stop())
-//                new InstantCommand(()->telemetry.addData("autoState", "strafe")),
-//                new TrajectoryFollowerCommand(drive, strafeRight),
-////                new InstantCommand(()->telemetry.addData("autoState", "push")),
-//                new ParallelCommandGroup(
-//                        new TrajectoryFollowerCommand(drive, pushConeTraj),
-//                        new SequentialCommandGroup(
-//                                new WaitUntilCommand(()->drive.getPoseEstimate().getY() > 12)
-//                        )
-//                ),
-//                new TurnCommand(drive, Math.toRadians(-31.0)),
-////                new InstantCommand(()->telemetry.addData("autoState", "turnDone"))
-////                new InstantCommand(()->telemetry.addData("autoState", "score")),
-//                new ScheduleCommand(ArmCommandFactory.createScoreMidBackJunction(clawRoll, clawPitch, arm1, arm2)),
-//                new WaitUntilCommand(()-> arm2.getAngle() > 90 && arm1.getAngle() > 169),
-//                new WaitCommand(1000),
-//                new InstantCommand(()->claw.Release()),
-//                new WaitCommand(1000),
-//                new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2)),
-//                new WaitCommand(1000),
-//
-//
+                new InstantCommand(()->drive.setPoseEstimate(tapePositon)),
+                new RunCommand(()->drive.updatePoseEstimate()).withTimeout(1000),
+                new TrajectoryFollowerCommand(drive, pushConeTraj),
+                new TurnCommand(drive, Math.toRadians(-31.0)),
+                new ScheduleCommand(ArmCommandFactory.createScoreMidBackJunction(clawRoll, clawPitch, arm1, arm2)),
+                new WaitUntilCommand(()-> arm2.getAngle() > 90 && arm1.getAngle() > 169),
+                new WaitCommand(1000),
+                new InstantCommand(()->claw.Release()),
+                new WaitCommand(1000),
+                new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2)),
+                new WaitCommand(1000)
+
+
 //                //To-do: Score cones from the cone stack during autonomous
 //
 //                //Park in the correct space

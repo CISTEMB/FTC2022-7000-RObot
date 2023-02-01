@@ -101,6 +101,7 @@ public class MecanumDriveSubsystem extends SubsystemBase {
     }
 
     public void stop() {
+        drive.breakFollowing();
         drive(0, 0, 0);
     }
 
