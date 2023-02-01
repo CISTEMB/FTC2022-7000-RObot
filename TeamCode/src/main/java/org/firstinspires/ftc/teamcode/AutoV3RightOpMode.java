@@ -130,16 +130,12 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 .build();
 
         Trajectory toTape = drive.trajectoryBuilder(strafeRight.end())
-                .forward(20)
-                .forward(
-                        6,
-                        SampleMecanumDrive.getVelocityConstraint(6, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .forward(30)
                 .build();
         Pose2d tapePositon = new Pose2d(0,0, Math.toRadians(0));
 
         Trajectory pushConeTraj = drive.trajectoryBuilder(tapePositon)
-                .forward(27.5)
+                .forward(26.625)
                 .build();
 
         Trajectory parkLeftTraj = drive.trajectoryBuilder(pushConeTraj.end())
@@ -161,7 +157,7 @@ public class AutoV3RightOpMode extends CommandOpMode {
                         ()->tapeDetector.getState()
                 ),
                 new InstantCommand(()->drive.setPoseEstimate(tapePositon)),
-                new RunCommand(()->drive.updatePoseEstimate()).withTimeout(1000),
+                new RunCommand(()->drive.updatePoseEstimate()).withTimeout(5000),
                 new TrajectoryFollowerCommand(drive, pushConeTraj),
                 new TurnCommand(drive, Math.toRadians(-31.0)),
                 new ScheduleCommand(ArmCommandFactory.createScoreMidBackJunction(clawRoll, clawPitch, arm1, arm2)),
