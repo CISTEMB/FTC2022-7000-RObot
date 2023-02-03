@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -58,7 +59,6 @@ public class AutoV3RightOpMode extends CommandOpMode {
 
     @Override
     public void initialize() {
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         drive = new MecanumDriveSubsystem(new SampleMecanumDrive(hardwareMap), false);
         arm1 = new Arm(hardwareMap, telemetry, "Arm1", "arm1Pot", "fEncoder", 16,1, 180, DcMotorSimple.Direction.REVERSE, Arm.ARM1_PID, 1, -1);
         arm2 = new Arm(hardwareMap, telemetry, "Arm2","arm2Pot", "lEncoder", 90, 1, 155, DcMotorSimple.Direction.FORWARD, Arm.ARM2_PID, 0.75, -0.75);
@@ -138,6 +138,12 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 .forward(26.625)
                 .build();
 
+        Pose2d scorePosition = new Pose2d(27.5, 0, Math.toRadians(-90));
+
+        Trajectory pickUpCone = drive.trajectoryBuilder(scorePosition)
+                .splineTo(new Vector2d(24.25, -23.5), Math.toRadians(-90))
+                .build();
+
         Trajectory parkLeftTraj = drive.trajectoryBuilder(pushConeTraj.end())
                 .strafeLeft(23)
                 .build();
@@ -152,22 +158,42 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 new WaitUntilCommand(()->isStarted()),
                 //waitForVisionCommand.withTimeout(5000),
                 new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)),
+                // Goto the right
                 new TrajectoryFollowerCommand(drive, strafeRight),
+
+                // Drive over tape
                 new TrajectoryFollowerCommand(drive, toTape).interruptOn(
                         ()->tapeDetector.getState()
                 ),
                 new InstantCommand(()->drive.setPoseEstimate(tapePositon)),
-                new RunCommand(()->drive.updatePoseEstimate()).withTimeout(5000),
+                new RunCommand(()->drive.updatePoseEstimate()).withTimeout(1000),
+
+                //move to scoring position
                 new TrajectoryFollowerCommand(drive, pushConeTraj),
                 new TurnCommand(drive, Math.toRadians(-31.0)),
+
+                //score cone
                 new ScheduleCommand(ArmCommandFactory.createScoreMidBackJunction(clawRoll, clawPitch, arm1, arm2)),
                 new WaitUntilCommand(()-> arm2.getAngle() > 90 && arm1.getAngle() > 169),
                 new WaitCommand(1000),
                 new InstantCommand(()->claw.Release()),
                 new WaitCommand(1000),
                 new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2)),
-                new WaitCommand(1000)
+                new WaitCommand(1000),
 
+                //turn twords stack
+                new TurnCommand(drive, Math.toRadians(-94+31)),
+                new ScheduleCommand(ArmCommandFactory.createPickupCone5(clawRoll, clawPitch, arm1, arm2)),
+                new WaitCommand(1000),
+                new InstantCommand(()->claw.Release()),
+                new TrajectoryFollowerCommand(drive, pickUpCone),
+                new WaitCommand(500),
+                new InstantCommand(()->claw.Grab()),
+                new WaitCommand(500),
+                new ScheduleCommand(new SequentialCommandGroup(
+                        ArmCommandFactory.createPickupCone6(clawRoll, clawPitch, arm1, arm2).withTimeout(250),
+                        new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2))
+                        ))
 
 //                //To-do: Score cones from the cone stack during autonomous
 //
@@ -189,6 +215,9 @@ public class AutoV3RightOpMode extends CommandOpMode {
     @Override
     public void run() {
         super.run();
+        telemetry.addData("Drive Pos X", drive.getPoseEstimate().getX());
+        telemetry.addData("Drive Pos Y", drive.getPoseEstimate().getY());
+        telemetry.addData("Drive Pos Heading",Math.toDegrees(drive.getPoseEstimate().getHeading()));
         telemetry.update();
     }
 
