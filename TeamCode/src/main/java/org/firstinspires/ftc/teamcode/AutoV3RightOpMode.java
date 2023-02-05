@@ -125,13 +125,14 @@ public class AutoV3RightOpMode extends CommandOpMode {
         Pose2d startingPosition = new Pose2d(0, 0, Math.toRadians(0));
         drive.setPoseEstimate(startingPosition);
 
-        Trajectory strafeRight = drive.trajectoryBuilder(startingPosition)
-                .strafeRight(4.125)
+        Trajectory toTape = drive.trajectoryBuilder(startingPosition)
+                .splineTo(new Vector2d(24, -4.125), Math.toRadians(0))
+                .forward(6)
                 .build();
 
-        Trajectory toTape = drive.trajectoryBuilder(strafeRight.end())
-                .forward(30)
-                .build();
+//        Trajectory toTape = drive.trajectoryBuilder(strafeRight.end())
+//                .forward(30)
+//                .build();
         Pose2d tapePositon = new Pose2d(0,0, Math.toRadians(0));
 
         Trajectory pushConeTraj = drive.trajectoryBuilder(tapePositon)
@@ -164,9 +165,6 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 new WaitUntilCommand(()->isStarted()),
                 waitForVisionCommand.withTimeout(5000),
                 new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)),
-                // Goto the right
-                new TrajectoryFollowerCommand(drive, strafeRight),
-
                 // Drive over tape
                 new TrajectoryFollowerCommand(drive, toTape).interruptOn(
                         ()->tapeDetector.getState()
