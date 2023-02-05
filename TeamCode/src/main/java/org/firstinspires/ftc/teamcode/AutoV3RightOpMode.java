@@ -144,6 +144,10 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 .splineTo(new Vector2d(24.25, -23.5), Math.toRadians(-90))
                 .build();
 
+        Trajectory goToScore = drive.trajectoryBuilder(pickUpCone.end(), true)
+                .splineTo(scorePosition.vec(), Math.toRadians(90))
+                .build();
+
         Trajectory parkLeftTraj = drive.trajectoryBuilder(pushConeTraj.end())
                 .strafeLeft(23)
                 .build();
@@ -193,7 +197,20 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 new ScheduleCommand(new SequentialCommandGroup(
                         ArmCommandFactory.createPickupCone6(clawRoll, clawPitch, arm1, arm2).withTimeout(250),
                         new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2))
-                        ))
+                )),
+                new WaitCommand(500),
+                new TrajectoryFollowerCommand(drive, goToScore),
+                new TurnCommand(drive, Math.toRadians(90-31.0)),
+
+                //Score second cone
+                new ScheduleCommand(ArmCommandFactory.createScoreMidBackJunction(clawRoll, clawPitch, arm1, arm2)),
+                new WaitUntilCommand(()-> arm2.getAngle() > 90 && arm1.getAngle() > 169),
+                new WaitCommand(1000),
+                new InstantCommand(()->claw.Release()),
+                new WaitCommand(1000),
+                new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2)),
+                new WaitCommand(1000),
+                new TurnCommand(drive, Math.toRadians(31.0))
 
 //                //To-do: Score cones from the cone stack during autonomous
 //
