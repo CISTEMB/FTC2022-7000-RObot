@@ -15,6 +15,7 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.google.common.collect.ImmutableMap;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -39,6 +40,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
  *
  * NOTE: this has been refactored to use FTCLib's command-based
  */
+@Disabled
 @Autonomous(group = "drive", name = "Auto V2 Left")
 public class AutoV2LeftOpMode extends CommandOpMode {
 
