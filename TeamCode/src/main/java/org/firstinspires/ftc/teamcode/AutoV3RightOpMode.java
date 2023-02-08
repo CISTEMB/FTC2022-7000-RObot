@@ -125,46 +125,46 @@ public class AutoV3RightOpMode extends CommandOpMode {
         Pose2d startingPosition = new Pose2d(0, 0, Math.toRadians(0));
         drive.setPoseEstimate(startingPosition);
 
-        Trajectory strafeRight = drive.trajectoryBuilder(startingPosition)
-                .strafeRight(4.125)
-                .build();
-
-        Trajectory toTape = drive.trajectoryBuilder(strafeRight.end())
-                .forward(30)
+        Trajectory toTape = drive.trajectoryBuilder(startingPosition)
+                .splineTo(new Vector2d(24, -4.5), Math.toRadians(0))
+                .forward(6)
                 .build();
         Pose2d tapePositon = new Pose2d(0,0, Math.toRadians(0));
 
+        final double distancePastTape = 27.5;
+
         Trajectory pushConeTraj = drive.trajectoryBuilder(tapePositon)
-                .forward(26.625)
+                .forward(distancePastTape)
                 .build();
 
-        Pose2d scorePosition = new Pose2d(27.5, 0, Math.toRadians(-90));
+        Pose2d scorePosition = new Pose2d(distancePastTape, 0, Math.toRadians(-90));
 
         Trajectory pickUpCone = drive.trajectoryBuilder(scorePosition)
-                .splineTo(new Vector2d(24.25, -23.5), Math.toRadians(-90))
+                .splineTo(new Vector2d(24.25, -22.5), Math.toRadians(-90)) // was y=-23.5
                 .build();
 
         Trajectory goToScore = drive.trajectoryBuilder(pickUpCone.end(), true)
                 .splineTo(scorePosition.vec(), Math.toRadians(90))
                 .build();
 
-        Trajectory parkLeftTraj = drive.trajectoryBuilder(pushConeTraj.end())
-                .strafeLeft(23)
+        Pose2d afterScore = new Pose2d(scorePosition.getX(), scorePosition.getY(), Math.toRadians(0));
+
+        Trajectory parkLeftTraj = drive.trajectoryBuilder(afterScore)
+                .strafeLeft(26)
                 .build();
 
-        Trajectory parkRightTraj = drive.trajectoryBuilder(pushConeTraj.end())
+        Trajectory parkRightTraj = drive.trajectoryBuilder(afterScore)
                 .strafeRight(23)
                 .build();
 
+        final double turnAngle = -31;
 
         WaitForVisionCommand waitForVisionCommand = new WaitForVisionCommand(pl);
         schedule(new SequentialCommandGroup(
                 new WaitUntilCommand(()->isStarted()),
-                //waitForVisionCommand.withTimeout(5000),
+                waitForVisionCommand.withTimeout(5000),
                 new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)),
-                // Goto the right
-                new TrajectoryFollowerCommand(drive, strafeRight),
-
+                new ScheduleCommand(ArmCommandFactory.createDriveModeFromFront(clawRoll, clawPitch, arm1, arm2)),
                 // Drive over tape
                 new TrajectoryFollowerCommand(drive, toTape).interruptOn(
                         ()->tapeDetector.getState()
@@ -174,7 +174,7 @@ public class AutoV3RightOpMode extends CommandOpMode {
 
                 //move to scoring position
                 new TrajectoryFollowerCommand(drive, pushConeTraj),
-                new TurnCommand(drive, Math.toRadians(-31.0)),
+                new TurnCommand(drive, Math.toRadians(turnAngle)),
 
                 //score cone
                 new ScheduleCommand(ArmCommandFactory.createScoreMidBackJunction(clawRoll, clawPitch, arm1, arm2)),
@@ -185,8 +185,8 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2)),
                 new WaitCommand(1000),
 
-                //turn twords stack
-                new TurnCommand(drive, Math.toRadians(-94+31)),
+                //turn towards stack
+                new TurnCommand(drive, Math.toRadians(-94-turnAngle)),
                 new ScheduleCommand(ArmCommandFactory.createPickupCone5(clawRoll, clawPitch, arm1, arm2)),
                 new WaitCommand(1000),
                 new InstantCommand(()->claw.Release()),
@@ -200,7 +200,7 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 )),
                 new WaitCommand(500),
                 new TrajectoryFollowerCommand(drive, goToScore),
-                new TurnCommand(drive, Math.toRadians(90-31.0)),
+                new TurnCommand(drive, Math.toRadians(90+turnAngle)),
 
                 //Score second cone
                 new ScheduleCommand(ArmCommandFactory.createScoreMidBackJunction(clawRoll, clawPitch, arm1, arm2)),
@@ -210,22 +210,22 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 new WaitCommand(1000),
                 new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2)),
                 new WaitCommand(1000),
-                new TurnCommand(drive, Math.toRadians(31.0))
+                new TurnCommand(drive, Math.toRadians(31.0)),
 
-//                //To-do: Score cones from the cone stack during autonomous
-//
-//                //Park in the correct space
-//                new TurnCommand(drive, Math.toRadians(31.0)),
-//                new MapSelectCommand<>(
-//                    ImmutableMap.of(
-//                            VisionPipeline.MarkerPlacement.LOCATION_1, new TrajectoryFollowerCommand(drive,parkLeftTraj),
-//                            VisionPipeline.MarkerPlacement.LOCATION_2, new PrintCommand("Location 2"),
-//                            VisionPipeline.MarkerPlacement.LOCATION_3, new TrajectoryFollowerCommand(drive,parkRightTraj),
-//                            VisionPipeline.MarkerPlacement.UNKNOWN, new PrintCommand("Location unknown")
-//                    ),
-//                    () -> waitForVisionCommand.getPlacement()
-//                ),
-//            new InstantCommand(() -> new TrajectoryFollowerCommand(drive, drive.trajectoryBuilder(drive.getPoseEstimate()).back(12).build()).schedule())
+                //To-do: Score cones from the cone stack during autonomous
+
+                //Park in the correct space
+                new TurnCommand(drive, Math.toRadians(31.0)),
+                new MapSelectCommand<>(
+                    ImmutableMap.of(
+                            VisionPipeline.MarkerPlacement.LOCATION_1, new TrajectoryFollowerCommand(drive,parkLeftTraj),
+                            VisionPipeline.MarkerPlacement.LOCATION_2, new PrintCommand("Location 2"),
+                            VisionPipeline.MarkerPlacement.LOCATION_3, new TrajectoryFollowerCommand(drive,parkRightTraj),
+                            VisionPipeline.MarkerPlacement.UNKNOWN, new PrintCommand("Location unknown")
+                    ),
+                    () -> waitForVisionCommand.getPlacement()
+                ),
+            new InstantCommand(() -> new TrajectoryFollowerCommand(drive, drive.trajectoryBuilder(drive.getPoseEstimate()).back(12).build()).schedule())
         ));
     }
 
