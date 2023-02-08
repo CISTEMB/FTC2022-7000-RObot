@@ -210,12 +210,11 @@ public class AutoV3RightOpMode extends CommandOpMode {
                 new WaitCommand(1000),
                 new ScheduleCommand(ArmCommandFactory.createDriveModeFromMidRear(clawRoll, clawPitch, arm1, arm2)),
                 new WaitCommand(1000),
-                new TurnCommand(drive, Math.toRadians(31.0)),
+                new TurnCommand(drive, Math.toRadians(-turnAngle)),
 
                 //To-do: Score cones from the cone stack during autonomous
 
                 //Park in the correct space
-                new TurnCommand(drive, Math.toRadians(31.0)),
                 new MapSelectCommand<>(
                     ImmutableMap.of(
                             VisionPipeline.MarkerPlacement.LOCATION_1, new TrajectoryFollowerCommand(drive,parkLeftTraj),
